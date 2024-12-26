@@ -7,11 +7,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Joystick joystick;
     [SerializeField] private Transform cameraTransform;
 
-    private IMoveable _movement;
-    private IGroundChecker _groundChecker;
-    private IMaterialScroller _materialScroller;
-    private DashController _dashController;
-    private IInputHandler[] _inputHandlers;
+    [SerializeField] private IMoveable _movement;
+    [SerializeField] private IGroundChecker _groundChecker;
+    [SerializeField] private IMaterialScroller _materialScroller;
+    [SerializeField] private DashController _dashController;
+    [SerializeField] private IInputHandler[] _inputHandlers;
+    [SerializeField] private IShooter _shooter;
 
     private void Awake()
     {
@@ -24,6 +25,7 @@ public class PlayerController : MonoBehaviour
         _groundChecker = GetComponent<GroundChecker>();
         _materialScroller = GetComponent<MaterialScroller>();
         _dashController = GetComponent<DashController>();
+        _shooter = GetComponent<ShootingSystem>();
 
         _inputHandlers = new IInputHandler[]
         {
@@ -37,6 +39,10 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             ResetRotation();
+        }
+        if (Input.GetKeyDown(KeyCode.E) && _shooter != null)
+        {
+            HandleShooting();
         }
     }
 
@@ -60,6 +66,14 @@ public class PlayerController : MonoBehaviour
             _movement.Rotate(moveDirection);
             _materialScroller.ScrollMaterial(moveDirection);
         }
+    }
+
+    private void HandleShooting()
+    {
+
+        Vector3 shootDirection = transform.forward;
+        _shooter.Shoot(shootDirection);
+
     }
 
     private Vector3 GetActiveInputDirection()
