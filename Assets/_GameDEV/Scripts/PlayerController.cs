@@ -10,16 +10,28 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
 
     public Material material1;
-    public Material material2; 
-    public float offsetSpeed = -0.01f; 
+    public Material material2;
+    public float offsetSpeed = -0.01f;
+
+    private DashController dashController;
+
+    public Transform groundCheck; // Zemin kontrol noktasý
+    public float groundCheckRadius = 0.2f; // Kontrol yarýçapý
+    public LayerMask groundLayer; // Zemin katmaný
+    private bool isGrounded; // Oyuncunun zeminde olup olmadýðýný kontrol eder
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        dashController = GetComponent<DashController>();
     }
 
     void FixedUpdate()
     {
+        CheckGrounded(); // Zemin kontrolünü yap
+
+        if (!isGrounded) return; // Eðer oyuncu havadaysa hareket etme
+
         float horizontal = joystick.Horizontal;
         float vertical = joystick.Vertical;
 
@@ -35,7 +47,9 @@ public class PlayerController : MonoBehaviour
 
             Vector3 moveDirection = (cameraForward.normalized * inputDirection.z + cameraRight.normalized * inputDirection.x).normalized;
 
-            rb.MovePosition(rb.position + moveDirection * moveSpeed * Time.fixedDeltaTime);
+            float currentSpeed = dashController != null && dashController.IsDashing ? dashController.DashSpeed : moveSpeed;
+
+            rb.MovePosition(rb.position + moveDirection * currentSpeed * Time.fixedDeltaTime);
 
             Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
             rb.rotation = Quaternion.Lerp(rb.rotation, toRotation, Time.fixedDeltaTime * 10f);
@@ -60,4 +74,10 @@ public class PlayerController : MonoBehaviour
             material2.mainTextureOffset = offsetY;
         }
     }
+
+    private void CheckGrounded()
+    {
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+    }
+
 }

@@ -56,6 +56,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 3D_Tile_Dungeon_Slope_01
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3dfa76864da4ab5419e1f2e9ff94eece, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
