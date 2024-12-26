@@ -1,96 +1,100 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public Joystick joystick;
-    public Transform cameraTransform;
-    private Rigidbody rb;
+    [Header("Movement Settings")]
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private Joystick joystick;
+    [SerializeField] private Transform cameraTransform;
 
-    public Material material1;
-    public Material material2;
-    public float offsetSpeed = -0.01f;
+    private IMoveable _movement;
+    private IGroundChecker _groundChecker;
+    private IMaterialScroller _materialScroller;
+    private DashController _dashController;
+    private IInputHandler[] _inputHandlers;
 
-    private DashController dashController;
-
-    public Transform groundCheck; // Zemin kontrol noktasý
-    public float groundCheckRadius = 0.2f; // Kontrol yarýçapý
-    public LayerMask groundLayer; // Zemin katmaný
-    private bool isGrounded; // Oyuncunun zeminde olup olmadýðýný kontrol eder
-
-    void Start()
+    private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        dashController = GetComponent<DashController>();
+        InitializeComponents();
     }
 
+    private void InitializeComponents()
+    {
+        _movement = GetComponent<PlayerMovement>();
+        _groundChecker = GetComponent<GroundChecker>();
+        _materialScroller = GetComponent<MaterialScroller>();
+        _dashController = GetComponent<DashController>();
+
+        _inputHandlers = new IInputHandler[]
+        {
+            new JoystickInput(joystick),
+            new KeyboardInput()
+        };
+    }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            PlayerResetRotation();
+            ResetRotation();
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        CheckGrounded(); // Zemin kontrolünü yap
+        HandleMovement();
+    }
 
-        if (!isGrounded) return; // Eðer oyuncu havadaysa hareket etme
+    private void HandleMovement()
+    {
+        _groundChecker.CheckGround();
+        if (!_groundChecker.IsGrounded) return;
 
-        float horizontal = joystick.Horizontal;
-        float vertical = joystick.Vertical;
-
-        Vector3 inputDirection = new Vector3(horizontal, 0f, vertical).normalized;
-
+        Vector3 inputDirection = GetActiveInputDirection();
         if (inputDirection.magnitude >= 0.1f)
         {
-            Vector3 cameraForward = cameraTransform.forward;
-            Vector3 cameraRight = cameraTransform.right;
+            Vector3 moveDirection = CalculateMoveDirection(inputDirection);
+            float currentSpeed = CalculateCurrentSpeed();
 
-            cameraForward.y = 0f;
-            cameraRight.y = 0f;
-
-            Vector3 moveDirection = (cameraForward.normalized * inputDirection.z + cameraRight.normalized * inputDirection.x).normalized;
-
-            float currentSpeed = dashController != null && dashController.IsDashing ? dashController.DashSpeed : moveSpeed;
-
-            rb.MovePosition(rb.position + moveDirection * currentSpeed * Time.fixedDeltaTime);
-
-            Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-            rb.rotation = Quaternion.Lerp(rb.rotation, toRotation, Time.fixedDeltaTime * 10f);
-
-            ScrollTexture(moveDirection);
+            _movement.Move(moveDirection, currentSpeed);
+            _movement.Rotate(moveDirection);
+            _materialScroller.ScrollMaterial(moveDirection);
         }
     }
 
-    private void ScrollTexture(Vector3 moveDirection)
+    private Vector3 GetActiveInputDirection()
     {
-        if (material1 != null)
+        foreach (var inputHandler in _inputHandlers)
         {
-            Vector2 offsetY = material1.mainTextureOffset;
-            offsetY.y += Time.time * offsetSpeed * moveDirection.magnitude;
-            material1.mainTextureOffset = offsetY;
+            if (inputHandler.HasInput)
+            {
+                return inputHandler.GetMovementInput();
+            }
         }
-
-        if (material2 != null)
-        {
-            Vector2 offsetY = material2.mainTextureOffset;
-            offsetY.y += Time.time * offsetSpeed * moveDirection.magnitude;
-            material2.mainTextureOffset = offsetY;
-        }
+        return Vector3.zero;
     }
 
-    private void CheckGrounded()
+    private Vector3 CalculateMoveDirection(Vector3 inputDirection)
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+        Vector3 cameraForward = cameraTransform.forward;
+        Vector3 cameraRight = cameraTransform.right;
+
+        cameraForward.y = 0f;
+        cameraRight.y = 0f;
+
+        return (cameraForward.normalized * inputDirection.z +
+                cameraRight.normalized * inputDirection.x).normalized;
     }
 
-    private void PlayerResetRotation()
+    private float CalculateCurrentSpeed()
     {
-        transform.rotation = Quaternion.Euler(0, transform.rotation.y, 0);
+        return _dashController != null && _dashController.IsDashing
+            ? _dashController.DashSpeed
+            : moveSpeed;
+    }
+
+    private void ResetRotation()
+    {
+        transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
     }
 }

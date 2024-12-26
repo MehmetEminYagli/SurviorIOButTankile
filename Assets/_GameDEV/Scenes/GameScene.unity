@@ -357,6 +357,9 @@ GameObject:
   - component: {fileID: 266493825}
   - component: {fileID: 266493823}
   - component: {fileID: 266493827}
+  - component: {fileID: 266493828}
+  - component: {fileID: 266493830}
+  - component: {fileID: 266493829}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -379,14 +382,6 @@ MonoBehaviour:
   moveSpeed: 5
   joystick: {fileID: 848755561}
   cameraTransform: {fileID: 1498540376}
-  material1: {fileID: 2100000, guid: dab5ccc36bb92254d97f6312175d1d21, type: 2}
-  material2: {fileID: 2100000, guid: 69b8d43a9c942ca45b86d55be4f1ec0e, type: 2}
-  offsetSpeed: -0.01
-  groundCheck: {fileID: 266493824}
-  groundCheckRadius: 1
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 8
 --- !u!4 &266493824
 Transform:
   m_ObjectHideFlags: 0
@@ -468,6 +463,51 @@ MonoBehaviour:
   dashSpeed: 10
   dashDuration: 0.5
   dashCooldown: 1.5
+--- !u!114 &266493828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266493822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f1e2f79a3d347143abc125341feec4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  groundCheckPoint: {fileID: 266493824}
+  groundCheckRadius: 1
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+--- !u!114 &266493829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266493822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c1a6e46f86675c4d8e8701330ff7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &266493830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266493822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3c23e402f39f934e90b1182d8af6083, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  materials:
+  - {fileID: 2100000, guid: dab5ccc36bb92254d97f6312175d1d21, type: 2}
+  - {fileID: 2100000, guid: 69b8d43a9c942ca45b86d55be4f1ec0e, type: 2}
+  offsetSpeed: -0.01
 --- !u!1 &285244966
 GameObject:
   m_ObjectHideFlags: 0
