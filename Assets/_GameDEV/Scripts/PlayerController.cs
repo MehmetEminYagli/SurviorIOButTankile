@@ -26,6 +26,15 @@ public class PlayerController : MonoBehaviour
         dashController = GetComponent<DashController>();
     }
 
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            PlayerResetRotation();
+        }
+    }
+
     void FixedUpdate()
     {
         CheckGrounded(); // Zemin kontrolünü yap
@@ -80,4 +89,8 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
     }
 
+    private void PlayerResetRotation()
+    {
+        transform.rotation = Quaternion.Euler(0, transform.rotation.y, 0);
+    }
 }

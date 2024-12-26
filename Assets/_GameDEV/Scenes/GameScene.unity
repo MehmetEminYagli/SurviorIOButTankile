@@ -201,9 +201,29 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1887588249311447238, guid: aa6b99ce238402c4fa3b379ffd83d3fe, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 3280472467906625904, guid: aa6b99ce238402c4fa3b379ffd83d3fe, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 5077878930914853364, guid: aa6b99ce238402c4fa3b379ffd83d3fe, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 5396204028233539178, guid: aa6b99ce238402c4fa3b379ffd83d3fe, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.49
+      objectReference: {fileID: 0}
     - target: {fileID: 5767083605218412829, guid: aa6b99ce238402c4fa3b379ffd83d3fe, type: 3}
       propertyPath: m_Name
       value: Grid
+      objectReference: {fileID: 0}
+    - target: {fileID: 8283186946970307804, guid: aa6b99ce238402c4fa3b379ffd83d3fe, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.959
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -363,7 +383,7 @@ MonoBehaviour:
   material2: {fileID: 2100000, guid: 69b8d43a9c942ca45b86d55be4f1ec0e, type: 2}
   offsetSpeed: -0.01
   groundCheck: {fileID: 266493824}
-  groundCheckRadius: 0.5
+  groundCheckRadius: 1
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
