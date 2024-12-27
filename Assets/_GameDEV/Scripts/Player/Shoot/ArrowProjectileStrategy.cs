@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class ArrowProjectileStrategy : IProjectileStrategy
 {
-    private readonly float maxHeight = 10f;
+    private readonly float maxHeight =10f;
     private readonly float projectileSpeed = 20f;
-    private readonly float arcHeight = 5f;
+    private readonly float arcHeight = 2f;
 
     private Vector3 startPos;
     private Vector3 targetPos;
@@ -15,7 +15,7 @@ public class ArrowProjectileStrategy : IProjectileStrategy
     public void InitializeProjectile(GameObject projectile, Vector3 startPosition, Vector3 direction)
     {
         startPos = startPosition;
-        targetPos = startPosition + direction * 15f; // Mesafeyi artýrdým
+        targetPos = startPosition + direction * 5f; // Mesafeyi artýrdým
         targetPos.y = 0;
 
         startPos.y += maxHeight;

@@ -5,17 +5,17 @@ public class ShootingSystem : MonoBehaviour, IShooter
     [Header("Spawn Settings")]
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float spawnHeight = -8.7f;
-    [SerializeField] private float spawnForwardOffset = 1.5f; // Karakterden ne kadar ileride spawn olacak
+    [SerializeField] private float spawnForwardOffset = 1.5f;
 
     [Header("Shooting Settings")]
     [SerializeField] private float shootCooldown = 0.5f;
 
     private float lastShootTime;
-    private IProjectileStrategy projectileStrategy;
+    private Transform playerTransform;
 
     private void Awake()
     {
-        projectileStrategy = new ArrowProjectileStrategy();
+        playerTransform = transform;
     }
 
     public bool CanShoot => Time.time - lastShootTime >= shootCooldown;
@@ -24,19 +24,16 @@ public class ShootingSystem : MonoBehaviour, IShooter
     {
         if (!CanShoot) return;
 
-        // Spawn pozisyonunu hesapla
-        Vector3 spawnPosition = transform.position + (direction.normalized * spawnForwardOffset);
-        spawnPosition.y = spawnHeight;
+        Vector3 spawnPosition = CalculateSpawnPosition(direction);
 
-        // Mermiyi oluþtur ve Layer'ýný ayarla
         GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-
-        // Player ve Projectile'ýn çarpýþmamasýný saðla
         Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
 
         var projectileComponent = projectile.GetComponent<Projectile>();
         if (projectileComponent != null)
         {
+            // Her mermi için yeni bir strateji örneði oluþtur
+            IProjectileStrategy projectileStrategy = new ArrowProjectileStrategy();
             projectileComponent.Initialize(projectileStrategy);
             projectileStrategy.InitializeProjectile(projectile, spawnPosition, direction);
         }
@@ -44,14 +41,12 @@ public class ShootingSystem : MonoBehaviour, IShooter
         lastShootTime = Time.time;
     }
 
-    private void OnDrawGizmos()
+    private Vector3 CalculateSpawnPosition(Vector3 direction)
     {
-        Vector3 spawnPos = transform.position + (transform.forward * spawnForwardOffset);
-        spawnPos.y = spawnHeight;
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(spawnPos, 0.2f);
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(spawnPos, spawnPos + transform.forward * 2f);
+        Vector3 spawnPosition = playerTransform.position;
+        spawnPosition.y = spawnHeight;
+        Vector3 normalizedDirection = direction.normalized;
+        spawnPosition += normalizedDirection * spawnForwardOffset;
+        return spawnPosition;
     }
 }

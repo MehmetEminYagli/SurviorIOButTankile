@@ -7,34 +7,21 @@ public class Projectile : MonoBehaviour
 
     private IProjectileStrategy _movementStrategy;
     private bool _hasCollided = false;
+    private bool _isInitialized = false;
 
     public void Initialize(IProjectileStrategy strategy)
     {
         _movementStrategy = strategy;
         _hasCollided = false;
-
-        // Rigidbody ayarlarýný yap
-        Rigidbody rb = GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.useGravity = false;
-            rb.isKinematic = true;
-            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-        }
-
-        // Collider ayarlarýný yap
-        Collider col = GetComponent<Collider>();
-        if (col != null)
-        {
-            col.isTrigger = false;
-        }
-
+        _isInitialized = true;
         Destroy(gameObject, lifetime);
     }
 
     private void Update()
     {
-        if (_movementStrategy != null && !_hasCollided)
+        if (!_isInitialized || _hasCollided) return;
+
+        if (_movementStrategy != null)
         {
             _movementStrategy.UpdateProjectileMovement(gameObject);
         }
@@ -42,12 +29,6 @@ public class Projectile : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Player ile çarpýþmayý yoksay
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            return;
-        }
-
         if (!_hasCollided)
         {
             _hasCollided = true;
@@ -57,7 +38,8 @@ public class Projectile : MonoBehaviour
 
     private void HandleCollision(Collision collision)
     {
-        // Rigidbody'yi devre dýþý býrak
+        if (collision.gameObject.CompareTag("Player")) return;
+
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -66,17 +48,13 @@ public class Projectile : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
         }
 
-        // Collider'ý devre dýþý býrak
         Collider collider = GetComponent<Collider>();
         if (collider != null)
         {
             collider.enabled = false;
         }
 
-        // Ok'u çarpma noktasýna sabitle
         transform.position = collision.contacts[0].point;
-
-        // Yüzeye dik olacak þekilde rotasyonu ayarla
         Vector3 normal = collision.contacts[0].normal;
         transform.rotation = Quaternion.LookRotation(-normal);
 
