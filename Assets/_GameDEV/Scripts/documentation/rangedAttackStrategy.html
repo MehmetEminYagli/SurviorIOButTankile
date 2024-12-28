@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RangedAttackStrategy Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎯 RangedAttackStrategy Script</h1>
+        <p>Uzak Mesafe Saldırı Stratejisi</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>🎯 RangedAttackStrategy.cs</h2>
+                <div class="tags">
+                    <span class="tag">🏹 Ranged</span>
+                    <span class="tag">🎯 Strategy</span>
+                    <span class="tag">💥 Projectile</span>
+                    <span class="tag">🤖 AI</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
+{
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private float projectileSpeed = 10f;
+    [SerializeField] private float maxSpreadAngle = 30f;
+
+    public void Attack(Transform target, float accuracy)
+    {
+        if (target == null) return;
+
+        Vector3 direction = (target.position - transform.position).normalized;
+        
+        // Calculate spread based on accuracy (higher accuracy = less spread)
+        float spread = maxSpreadAngle * (1f - accuracy);
+        float randomSpread = Random.Range(-spread, spread);
+        Quaternion rotation = Quaternion.Euler(0, randomSpread, 0) * Quaternion.LookRotation(direction);
+
+        GameObject projectile = Instantiate(projectilePrefab, transform.position, rotation);
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = rotation * Vector3.forward * projectileSpeed;
+        }
+
+        Destroy(projectile, 5f); // Destroy projectile after 5 seconds
+    }
+}</code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Sınıf Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Uzak mesafe düşmanlar için mermi tabanlı saldırı davranışını tanımlar</li>
+                    <li>🔧 <strong>Özellikler:</strong>
+                        <ul>
+                            <li>IAttackStrategy arayüzü implementasyonu</li>
+                            <li>Mermi oluşturma ve fırlatma</li>
+                            <li>İsabet oranına göre yayılma hesaplama</li>
+                            <li>Fizik tabanlı mermi hareketi</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Temel Özellikler</h4>
+                    <ul>
+                        <li><strong>Mermi Ayarları:</strong>
+                            <ul>
+                                <li>projectilePrefab: Mermi prefabı</li>
+                                <li>projectileSpeed: Mermi hızı (10)</li>
+                                <li>maxSpreadAngle: Maksimum sapma açısı (30)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Attack Metodu</h4>
+                    <pre><code class="language-csharp">
+public void Attack(Transform target, float accuracy)
+{
+    // Hedef kontrolü
+    // Yön hesaplama
+    // Sapma hesaplama
+    // Mermi oluşturma ve fırlatma
+}</code></pre>
+                    <ul>
+                        <li><strong>Parametreler:</strong>
+                            <ul>
+                                <li>target: Hedef Transform</li>
+                                <li>accuracy: İsabet oranı (0-1)</li>
+                            </ul>
+                        </li>
+                        <li><strong>İşlem Adımları:</strong>
+                            <ul>
+                                <li>Hedef geçerlilik kontrolü</li>
+                                <li>Hedef yönünü hesaplama</li>
+                                <li>İsabet oranına göre sapma hesaplama</li>
+                                <li>Mermi oluşturma ve hız verme</li>
+                                <li>Otomatik temizleme ayarlama</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li><strong>Mermi Sistemi:</strong>
+                            <ul>
+                                <li>Fizik tabanlı mermi hareketi</li>
+                                <li>Otomatik mermi temizleme</li>
+                                <li>İsabet oranına göre sapma</li>
+                            </ul>
+                        </li>
+                        <li><strong>Optimizasyon:</strong>
+                            <ul>
+                                <li>Erken çıkış kontrolleri</li>
+                                <li>Null kontrolleri</li>
+                                <li>Otomatik mermi yok etme</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="unity-setup">
+                    <h4>🎮 Unity Editör Ayarları</h4>
+                    <ul>
+                        <li><strong>Gerekli Bileşenler:</strong>
+                            <ul>
+                                <li>Projectile Prefab</li>
+                                <li>Rigidbody (mermi için)</li>
+                                <li>Collider (mermi için)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Ayarlanabilir Değerler:</strong>
+                            <ul>
+                                <li>Mermi hızı</li>
+                                <li>Sapma açısı</li>
+                                <li>Mermi prefabı</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="comparison">
+                    <h4>🔄 MeleeAttackStrategy ile Karşılaştırma</h4>
+                    <table>
+                        <tr>
+                            <th>Özellik</th>
+                            <th>RangedAttackStrategy</th>
+                            <th>MeleeAttackStrategy</th>
+                        </tr>
+                        <tr>
+                            <td>Saldırı Tipi</td>
+                            <td>Mermi Bazlı</td>
+                            <td>Doğrudan Hasar</td>
+                        </tr>
+                        <tr>
+                            <td>Menzil</td>
+                            <td>Uzun (15+ birim)</td>
+                            <td>Kısa (1.5 birim)</td>
+                        </tr>
+                        <tr>
+                            <td>İsabet Mekanizması</td>
+                            <td>Sapma Açısı</td>
+                            <td>Mesafe Kontrolü</td>
+                        </tr>
+                        <tr>
+                            <td>Özel Gereksinim</td>
+                            <td>Mermi Prefabı</td>
+                            <td>Yok</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnemySpawner Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🔄 EnemySpawner Script</h1>
+        <p>Düşman Oluşturma ve Yönetim Sistemi</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>🔄 EnemySpawner.cs</h2>
+                <div class="tags">
+                    <span class="tag">🎮 Game System</span>
+                    <span class="tag">🔄 Spawn</span>
+                    <span class="tag">🎯 NavMesh</span>
+                    <span class="tag">⚙️ Manager</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+public class EnemySpawner : MonoBehaviour
+{
+    [SerializeField] private EnemyFactory enemyFactory;
+    [SerializeField] private int maxEnemies = 10;
+    [SerializeField] private float spawnInterval = 2f;
+    [SerializeField] private float minSpawnDistance = 20f;
+    [SerializeField] private float maxSpawnDistance = 30f;
+    [SerializeField] private Transform[] players;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private float maxRayDistance = 50f;
+    [SerializeField] private int maxSpawnAttempts = 5;
+
+    private Camera mainCamera;
+    private float lastSpawnTime;
+    private List<GameObject> activeEnemies = new List<GameObject>();
+
+    private void Update()
+    {
+        if (Time.time - lastSpawnTime >= spawnInterval && activeEnemies.Count < maxEnemies)
+        {
+            SpawnEnemy();
+            lastSpawnTime = Time.time;
+        }
+        activeEnemies.RemoveAll(enemy => enemy == null);
+    }
+}</code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Sınıf Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Düşmanların oyun dünyasında otomatik olarak oluşturulması ve yönetilmesi</li>
+                    <li>🔧 <strong>Özellikler:</strong>
+                        <ul>
+                            <li>Düzenli aralıklarla düşman oluşturma</li>
+                            <li>Maksimum düşman sayısı kontrolü</li>
+                            <li>Akıllı spawn pozisyonu seçimi</li>
+                            <li>NavMesh uyumlu spawn sistemi</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Temel Özellikler</h4>
+                    <ul>
+                        <li><strong>Spawn Ayarları:</strong>
+                            <ul>
+                                <li>maxEnemies: Maksimum düşman sayısı (10)</li>
+                                <li>spawnInterval: Oluşturma aralığı (2s)</li>
+                                <li>minSpawnDistance: Minimum spawn mesafesi (20)</li>
+                                <li>maxSpawnDistance: Maksimum spawn mesafesi (30)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Spawn Kontrolleri:</strong>
+                            <ul>
+                                <li>groundLayer: Zemin katmanı kontrolü</li>
+                                <li>maxRayDistance: Zemin kontrolü mesafesi (50)</li>
+                                <li>maxSpawnAttempts: Maksimum deneme sayısı (5)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Temel Metodlar</h4>
+                    <pre><code class="language-csharp">
+private void SpawnEnemy()
+{
+    // Geçerli spawn pozisyonu bulma
+    // Düşman tipini belirleme
+    // Düşmanı oluşturma ve hedef atama
+}
+
+private Vector3? GetValidSpawnPosition()
+{
+    // Kamera dışında rastgele pozisyon seçme
+    // NavMesh üzerinde geçerli nokta bulma
+    // Zemin kontrolü yapma
+}
+
+private Transform FindNearestPlayer(Vector3 position)
+{
+    // En yakın oyuncuyu bulma
+    // Mesafe hesaplama ve karşılaştırma
+}</code></pre>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li><strong>Spawn Sistemi:</strong>
+                            <ul>
+                                <li>Kamera görüş alanı dışında spawn</li>
+                                <li>NavMesh üzerinde geçerli pozisyon kontrolü</li>
+                                <li>Zemin kontrolü ile havada spawn engelleme</li>
+                            </ul>
+                        </li>
+                        <li><strong>Düşman Yönetimi:</strong>
+                            <ul>
+                                <li>Aktif düşman sayısı kontrolü</li>
+                                <li>Otomatik temizleme sistemi</li>
+                                <li>Hedef atama mekanizması</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="unity-setup">
+                    <h4>🎮 Unity Editör Ayarları</h4>
+                    <ul>
+                        <li><strong>Gerekli Referanslar:</strong>
+                            <ul>
+                                <li>EnemyFactory referansı</li>
+                                <li>Player Transform dizisi</li>
+                                <li>Ground Layer seçimi</li>
+                            </ul>
+                        </li>
+                        <li><strong>Spawn Ayarları:</strong>
+                            <ul>
+                                <li>Spawn mesafelerini oyun alanına göre ayarlama</li>
+                                <li>Spawn aralığını zorluk seviyesine göre belirleme</li>
+                                <li>Maksimum düşman sayısını performansa göre ayarlama</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

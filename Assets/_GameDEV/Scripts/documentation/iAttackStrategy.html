@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAttackStrategy Interface - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>📋 IAttackStrategy Interface</h1>
+        <p>Saldırı Stratejisi Arayüzü</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>📋 IAttackStrategy.cs</h2>
+                <div class="tags">
+                    <span class="tag">📋 Interface</span>
+                    <span class="tag">🎯 Strategy</span>
+                    <span class="tag">⚔️ Combat</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+public interface IAttackStrategy
+{
+    void Attack(Transform target, float accuracy);
+}</code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Arayüz Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Farklı saldırı stratejileri için ortak bir sözleşme tanımlar</li>
+                    <li>🔧 <strong>Özellikler:</strong>
+                        <ul>
+                            <li>Strategy Pattern implementasyonu</li>
+                            <li>Saldırı davranışı standardizasyonu</li>
+                            <li>Modüler ve genişletilebilir yapı</li>
+                            <li>Bağımlılık tersine çevirme prensibi</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>🔄 Attack Metodu</h4>
+                    <pre><code class="language-csharp">
+void Attack(Transform target, float accuracy);</code></pre>
+                    <ul>
+                        <li><strong>Parametreler:</strong>
+                            <ul>
+                                <li>target: Hedef Transform</li>
+                                <li>accuracy: İsabet oranı (0-1)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Kullanım:</strong>
+                            <ul>
+                                <li>Hedef nesneye saldırı gerçekleştirme</li>
+                                <li>İsabet oranına göre saldırı etkisini ayarlama</li>
+                                <li>Farklı saldırı tipleri için temel şablon</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li><strong>Kullanım Alanları:</strong>
+                            <ul>
+                                <li>Yakın mesafe saldırıları (MeleeAttackStrategy)</li>
+                                <li>Uzak mesafe saldırıları (RangedAttackStrategy)</li>
+                                <li>Özel saldırı tipleri için genişletilebilir</li>
+                            </ul>
+                        </li>
+                        <li><strong>Tasarım Prensipleri:</strong>
+                            <ul>
+                                <li>Strategy Pattern</li>
+                                <li>Dependency Inversion</li>
+                                <li>Single Responsibility</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementations">
+                    <h4>🔄 Mevcut Implementasyonlar</h4>
+                    <table>
+                        <tr>
+                            <th>Sınıf</th>
+                            <th>Açıklama</th>
+                            <th>Özel Özellikler</th>
+                        </tr>
+                        <tr>
+                            <td>MeleeAttackStrategy</td>
+                            <td>Yakın mesafe saldırıları</td>
+                            <td>
+                                <ul>
+                                    <li>Mesafe kontrolü</li>
+                                    <li>Doğrudan hasar</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>RangedAttackStrategy</td>
+                            <td>Uzak mesafe saldırıları</td>
+                            <td>
+                                <ul>
+                                    <li>Mermi sistemi</li>
+                                    <li>Sapma hesaplama</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="usage-example">
+                    <h4>📝 Kullanım Örneği</h4>
+                    <pre><code class="language-csharp">
+public class Enemy : MonoBehaviour
+{
+    private IAttackStrategy attackStrategy;
+
+    private void Awake()
+    {
+        // Strateji ataması
+        attackStrategy = GetComponent<MeleeAttackStrategy>();
+    }
+
+    public void PerformAttack(Transform target)
+    {
+        // Strateji kullanımı
+        attackStrategy.Attack(target, accuracy);
+    }
+
+    public void ChangeStrategy(IAttackStrategy newStrategy)
+    {
+        // Runtime'da strateji değiştirme
+        attackStrategy = newStrategy;
+    }
+}</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

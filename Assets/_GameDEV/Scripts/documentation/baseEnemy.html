@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BaseEnemy Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>👾 BaseEnemy Script</h1>
+        <p>Temel Düşman Sınıfı</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>👾 BaseEnemy.cs</h2>
+                <div class="tags">
+                    <span class="tag">🤖 AI</span>
+                    <span class="tag">🎯 NavMesh</span>
+                    <span class="tag">⚔️ Combat</span>
+                    <span class="tag">📋 Abstract</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+[RequireComponent(typeof(NavMeshAgent))]
+public abstract class BaseEnemy : MonoBehaviour, IEnemy
+{
+    [Header("Base Stats")]
+    [SerializeField] protected float maxHealth = 100f;
+    [SerializeField] protected float moveSpeed = 5f;
+    [SerializeField] protected float stoppingDistance = 5f;
+    [SerializeField] protected float attackRange = 10f;
+    [SerializeField] protected float attackCooldown = 2f;
+    [SerializeField] protected float accuracy = 0.8f;
+    
+    [Header("Movement Settings")]
+    [SerializeField] protected float rotationSpeed = 5f;
+    [SerializeField] protected float updatePathInterval = 0.1f;
+    [SerializeField] protected float accelerationSpeed = 8f;
+    [SerializeField] protected float turnDampening = 0.5f;
+    [SerializeField] protected float movementSmoothing = 0.1f;
+    [SerializeField] protected float pathEndThreshold = 0.5f;
+
+    protected IAttackStrategy attackStrategy;
+    protected NavMeshAgent agent;
+    protected Transform target;
+    protected float currentHealth;
+    protected float lastAttackTime;
+    protected float nextPathUpdate;
+}</code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Sınıf Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Tüm düşman tipleri için temel davranışları ve özellikleri tanımlar</li>
+                    <li>🔧 <strong>Özellikler:</strong>
+                        <ul>
+                            <li>Abstract sınıf - temel düşman şablonu</li>
+                            <li>NavMeshAgent entegrasyonu</li>
+                            <li>Sağlık ve hasar sistemi</li>
+                            <li>Hareket ve saldırı mekanikleri</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Temel Özellikler</h4>
+                    <ul>
+                        <li><strong>Base Stats:</strong>
+                            <ul>
+                                <li>maxHealth: Maksimum can puanı (100)</li>
+                                <li>moveSpeed: Hareket hızı (5)</li>
+                                <li>stoppingDistance: Durma mesafesi (5)</li>
+                                <li>attackRange: Saldırı menzili (10)</li>
+                                <li>attackCooldown: Saldırı bekleme süresi (2)</li>
+                                <li>accuracy: İsabet oranı (0.8)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Movement Settings:</strong>
+                            <ul>
+                                <li>rotationSpeed: Dönüş hızı (5)</li>
+                                <li>updatePathInterval: Yol güncelleme sıklığı (0.1)</li>
+                                <li>accelerationSpeed: Hızlanma oranı (8)</li>
+                                <li>turnDampening: Dönüş yumuşatma (0.5)</li>
+                                <li>movementSmoothing: Hareket yumuşatma (0.1)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Temel Metodlar</h4>
+                    <pre><code class="language-csharp">
+protected virtual void Awake()
+{
+    // NavMeshAgent ayarları ve başlangıç değerleri
+}
+
+public virtual void Initialize(Vector3 spawnPosition)
+{
+    // Düşmanı spawn pozisyonunda başlatma
+}
+
+public virtual void Move()
+{
+    // NavMesh üzerinde hedefe doğru hareket
+    // Yumuşak hareket ve dönüş
+}
+
+public virtual void Attack()
+{
+    // Saldırı menzili kontrolü
+    // Saldırı stratejisini uygulama
+}
+
+public virtual void TakeDamage(float damage)
+{
+    // Hasar alma ve ölüm kontrolü
+}
+
+public virtual void Die()
+{
+    // Ölüm işlemleri
+}</code></pre>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li><strong>NavMeshAgent Kullanımı:</strong>
+                            <ul>
+                                <li>Otomatik yol bulma</li>
+                                <li>Engel algılama</li>
+                                <li>Yumuşak hareket</li>
+                            </ul>
+                        </li>
+                        <li><strong>Hareket Sistemi:</strong>
+                            <ul>
+                                <li>Yumuşak dönüşler</li>
+                                <li>Hızlanma ve yavaşlama</li>
+                                <li>Mesafe kontrolü</li>
+                            </ul>
+                        </li>
+                        <li><strong>Saldırı Sistemi:</strong>
+                            <ul>
+                                <li>Strateji deseni kullanımı</li>
+                                <li>Cooldown yönetimi</li>
+                                <li>Menzil kontrolü</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="unity-setup">
+                    <h4>🎮 Unity Editör Ayarları</h4>
+                    <ul>
+                        <li><strong>Gerekli Bileşenler:</strong>
+                            <ul>
+                                <li>NavMeshAgent</li>
+                                <li>Collider</li>
+                                <li>Rigidbody (isteğe bağlı)</li>
+                            </ul>
+                        </li>
+                        <li><strong>NavMesh Ayarları:</strong>
+                            <ul>
+                                <li>NavMesh Surface oluşturma</li>
+                                <li>Agent türü seçimi</li>
+                                <li>Engel katmanları ayarlama</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

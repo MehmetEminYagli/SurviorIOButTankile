@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnemyProjectile Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎯 EnemyProjectile Script</h1>
+        <p>Düşman Mermi Sistemi</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>🎯 EnemyProjectile.cs</h2>
+                <div class="tags">
+                    <span class="tag">🎯 Projectile</span>
+                    <span class="tag">💥 Damage</span>
+                    <span class="tag">⚔️ Combat</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+[RequireComponent(typeof(Rigidbody))]
+public class EnemyProjectile : MonoBehaviour
+{
+    [SerializeField] private float damage = 10f;
+    [SerializeField] private float lifeTime = 5f;
+
+    private void Start()
+    {
+        Destroy(gameObject, lifeTime);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Check if we hit a player
+        IHealth health = collision.gameObject.GetComponent<IHealth>();
+        if (health != null)
+        {
+            health.TakeDamage(damage);
+        }
+
+        // Destroy the projectile on any collision
+        Destroy(gameObject);
+    }
+}</code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Sınıf Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Düşmanların fırlattığı mermilerin davranışlarını ve hasar sistemini yönetir</li>
+                    <li>🔧 <strong>Özellikler:</strong>
+                        <ul>
+                            <li>Otomatik yok olma sistemi</li>
+                            <li>Çarpışma tespiti</li>
+                            <li>Hasar verme mekanizması</li>
+                            <li>Fizik tabanlı hareket</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Temel Özellikler</h4>
+                    <ul>
+                        <li><strong>Mermi Ayarları:</strong>
+                            <ul>
+                                <li>damage: Verilen hasar miktarı (10)</li>
+                                <li>lifeTime: Mermi ömrü (5 saniye)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Gerekli Bileşenler:</strong>
+                            <ul>
+                                <li>Rigidbody: Fizik tabanlı hareket için</li>
+                                <li>Collider: Çarpışma tespiti için (otomatik)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Temel Metodlar</h4>
+                    <pre><code class="language-csharp">
+private void Start()
+{
+    // Mermi ömrünü ayarlama ve otomatik yok etme
+}
+
+private void OnCollisionEnter(Collision collision)
+{
+    // Çarpışma kontrolü
+    // Hasar verme
+    // Mermiyi yok etme
+}</code></pre>
+                    <ul>
+                        <li><strong>Start:</strong>
+                            <ul>
+                                <li>Mermi ömrünü başlatma</li>
+                                <li>Otomatik yok etme zamanlaması</li>
+                            </ul>
+                        </li>
+                        <li><strong>OnCollisionEnter:</strong>
+                            <ul>
+                                <li>Çarpılan nesnenin sağlık kontrolü</li>
+                                <li>Hasar uygulama</li>
+                                <li>Mermiyi yok etme</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li><strong>Fizik Sistemi:</strong>
+                            <ul>
+                                <li>Rigidbody ile fizik tabanlı hareket</li>
+                                <li>Çarpışma tespiti için Collider kullanımı</li>
+                                <li>Otomatik temizleme sistemi</li>
+                            </ul>
+                        </li>
+                        <li><strong>Hasar Sistemi:</strong>
+                            <ul>
+                                <li>IHealth arayüzü ile hasar verme</li>
+                                <li>Güvenli tip kontrolü</li>
+                                <li>Çarpışma sonrası temizleme</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="unity-setup">
+                    <h4>🎮 Unity Editör Ayarları</h4>
+                    <ul>
+                        <li><strong>Gerekli Bileşenler:</strong>
+                            <ul>
+                                <li>Rigidbody (otomatik eklenir)</li>
+                                <li>Sphere/Box Collider</li>
+                                <li>Uygun materyal ve mesh</li>
+                            </ul>
+                        </li>
+                        <li><strong>Ayarlanması Gerekenler:</strong>
+                            <ul>
+                                <li>Damage değeri (varsayılan: 10)</li>
+                                <li>Lifetime değeri (varsayılan: 5)</li>
+                                <li>Rigidbody ayarları (kütle, sürtünme, vs.)</li>
+                                <li>Layer ve Tag ayarları</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

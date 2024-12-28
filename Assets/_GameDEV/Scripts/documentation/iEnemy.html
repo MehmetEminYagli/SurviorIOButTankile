@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IEnemy Interface - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>📋 IEnemy Interface</h1>
+        <p>Düşman Arayüzü</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>📋 IEnemy.cs</h2>
+                <div class="tags">
+                    <span class="tag">📋 Interface</span>
+                    <span class="tag">👾 Enemy</span>
+                    <span class="tag">🤖 AI</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+public interface IEnemy
+{
+    void Initialize(Vector3 spawnPosition);
+    void Move();
+    void Attack();
+    void TakeDamage(float damage);
+    void Die();
+    void SetTarget(Transform target);
+}</code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Arayüz Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Tüm düşman tipleri için temel davranışları tanımlayan sözleşme</li>
+                    <li>🔧 <strong>Özellikler:</strong>
+                        <ul>
+                            <li>Temel düşman davranışları</li>
+                            <li>Yaşam döngüsü yönetimi</li>
+                            <li>Hareket ve saldırı kontrolü</li>
+                            <li>Hedef yönetimi</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>🔄 Metodlar</h4>
+                    <ul>
+                        <li><strong>Initialize:</strong>
+                            <pre><code class="language-csharp">void Initialize(Vector3 spawnPosition);</code></pre>
+                            <ul>
+                                <li>Düşmanı belirtilen pozisyonda başlatır</li>
+                                <li>Başlangıç değerlerini ayarlar</li>
+                            </ul>
+                        </li>
+                        <li><strong>Move:</strong>
+                            <pre><code class="language-csharp">void Move();</code></pre>
+                            <ul>
+                                <li>Düşmanın hareket mantığını yönetir</li>
+                                <li>Hedefe doğru hareket sağlar</li>
+                            </ul>
+                        </li>
+                        <li><strong>Attack:</strong>
+                            <pre><code class="language-csharp">void Attack();</code></pre>
+                            <ul>
+                                <li>Saldırı mantığını yönetir</li>
+                                <li>Strateji desenini kullanır</li>
+                            </ul>
+                        </li>
+                        <li><strong>TakeDamage:</strong>
+                            <pre><code class="language-csharp">void TakeDamage(float damage);</code></pre>
+                            <ul>
+                                <li>Hasar alma mantığını yönetir</li>
+                                <li>Can değerini günceller</li>
+                            </ul>
+                        </li>
+                        <li><strong>Die:</strong>
+                            <pre><code class="language-csharp">void Die();</code></pre>
+                            <ul>
+                                <li>Ölüm mantığını yönetir</li>
+                                <li>Temizleme işlemlerini yapar</li>
+                            </ul>
+                        </li>
+                        <li><strong>SetTarget:</strong>
+                            <pre><code class="language-csharp">void SetTarget(Transform target);</code></pre>
+                            <ul>
+                                <li>Hedef atama mantığını yönetir</li>
+                                <li>Takip edilecek hedefi belirler</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li><strong>Kullanım Alanları:</strong>
+                            <ul>
+                                <li>BaseEnemy sınıfı temel implementasyonu</li>
+                                <li>MeleeEnemy özelleştirilmiş implementasyonu</li>
+                                <li>RangedEnemy özelleştirilmiş implementasyonu</li>
+                            </ul>
+                        </li>
+                        <li><strong>Tasarım Prensipleri:</strong>
+                            <ul>
+                                <li>Interface Segregation</li>
+                                <li>Dependency Inversion</li>
+                                <li>Single Responsibility</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementations">
+                    <h4>🔄 Mevcut Implementasyonlar</h4>
+                    <table>
+                        <tr>
+                            <th>Sınıf</th>
+                            <th>Açıklama</th>
+                            <th>Özel Özellikler</th>
+                        </tr>
+                        <tr>
+                            <td>BaseEnemy</td>
+                            <td>Temel düşman sınıfı</td>
+                            <td>
+                                <ul>
+                                    <li>NavMeshAgent entegrasyonu</li>
+                                    <li>Temel hareket ve saldırı</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>MeleeEnemy</td>
+                            <td>Yakın mesafe düşmanı</td>
+                            <td>
+                                <ul>
+                                    <li>Yakın mesafe saldırı</li>
+                                    <li>Hızlı hareket</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>RangedEnemy</td>
+                            <td>Uzak mesafe düşmanı</td>
+                            <td>
+                                <ul>
+                                    <li>Uzak mesafe saldırı</li>
+                                    <li>Mesafe koruma</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="usage-example">
+                    <h4>📝 Kullanım Örneği</h4>
+                    <pre><code class="language-csharp">
+public class EnemyManager : MonoBehaviour
+{
+    private List<IEnemy> enemies = new List<IEnemy>();
+    private Transform playerTarget;
+
+    public void SpawnEnemy(IEnemy enemy, Vector3 position)
+    {
+        // Düşmanı başlat
+        enemy.Initialize(position);
+        enemy.SetTarget(playerTarget);
+        enemies.Add(enemy);
+    }
+
+    public void UpdateEnemies()
+    {
+        foreach (var enemy in enemies)
+        {
+            // Düşman davranışlarını güncelle
+            enemy.Move();
+            enemy.Attack();
+        }
+    }
+}</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

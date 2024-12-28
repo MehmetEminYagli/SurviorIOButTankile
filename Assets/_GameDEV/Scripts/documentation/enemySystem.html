@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enemy System - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>👾 Enemy System</h1>
+        <p>Düşman Sistemi ve Yapay Zeka</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>👾 BaseEnemy.cs</h2>
+                <div class="tags">
+                    <span class="tag">🤖 AI</span>
+                    <span class="tag">🎯 NavMesh</span>
+                    <span class="tag">⚔️ Combat</span>
+                    <span class="tag">📋 Abstract</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+[RequireComponent(typeof(NavMeshAgent))]
+public abstract class BaseEnemy : MonoBehaviour, IEnemy
+{
+    [Header("Base Stats")]
+    [SerializeField] protected float maxHealth = 100f;
+    [SerializeField] protected float moveSpeed = 5f;
+    [SerializeField] protected float stoppingDistance = 5f;
+    [SerializeField] protected float attackRange = 10f;
+    [SerializeField] protected float attackCooldown = 2f;
+    [SerializeField] protected float accuracy = 0.8f;
+    
+    [Header("Movement Settings")]
+    [SerializeField] protected float rotationSpeed = 5f;
+    [SerializeField] protected float updatePathInterval = 0.1f;
+    [SerializeField] protected float accelerationSpeed = 8f;
+    [SerializeField] protected float turnDampening = 0.5f;
+    [SerializeField] protected float movementSmoothing = 0.1f;
+    [SerializeField] protected float pathEndThreshold = 0.5f;
+
+    protected IAttackStrategy attackStrategy;
+    protected NavMeshAgent agent;
+    protected Transform target;
+    // ... diğer özellikler
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Temel Düşman Sınıfı</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Tüm düşman tipleri için temel davranışları ve özellikleri tanımlar</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>NavMeshAgent ile otomatik yol bulma</li>
+                            <li>Strateji desenini kullanan saldırı sistemi</li>
+                            <li>Yumuşak hareket ve dönüş mekanikleri</li>
+                            <li>Sağlık ve hasar sistemi</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Temel Özellikler</h4>
+                    <ul>
+                        <li><strong>Base Stats:</strong>
+                            <ul>
+                                <li>maxHealth: Maksimum can puanı</li>
+                                <li>moveSpeed: Hareket hızı</li>
+                                <li>stoppingDistance: Durma mesafesi</li>
+                                <li>attackRange: Saldırı menzili</li>
+                                <li>attackCooldown: Saldırı bekleme süresi</li>
+                                <li>accuracy: İsabet oranı</li>
+                            </ul>
+                        </li>
+                        <li><strong>Movement Settings:</strong>
+                            <ul>
+                                <li>rotationSpeed: Dönüş hızı</li>
+                                <li>updatePathInterval: Yol güncelleme sıklığı</li>
+                                <li>accelerationSpeed: Hızlanma oranı</li>
+                                <li>movementSmoothing: Hareket yumuşatma</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Temel Metodlar</h4>
+                    <pre><code class="language-csharp">
+public virtual void Move()
+{
+    // NavMesh üzerinde hedefe doğru hareket
+    // Yumuşak hareket ve dönüş
+    // Mesafe kontrolü
+}
+
+public virtual void Attack()
+{
+    // Menzil kontrolü
+    // Hedef takibi
+    // Saldırı stratejisi uygulama
+}
+
+public virtual void TakeDamage(float damage)
+{
+    // Hasar alma ve ölüm kontrolü
+}
+                    </code></pre>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li>NavMeshAgent ile otomatik yol bulma</li>
+                        <li>Strategy Pattern ile farklı saldırı tipleri</li>
+                        <li>Smooth hareket sistemi</li>
+                        <li>Modüler ve genişletilebilir yapı</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="script-section">
+            <div class="script-header">
+                <h2>🏭 Enemy Factory ve Spawner</h2>
+                <div class="tags">
+                    <span class="tag">🏭 Factory</span>
+                    <span class="tag">🔄 Spawn</span>
+                    <span class="tag">⚙️ System</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+public class EnemyFactory : MonoBehaviour
+{
+    [SerializeField] private GameObject meleeEnemyPrefab;
+    [SerializeField] private GameObject rangedEnemyPrefab;
+
+    public IEnemy CreateEnemy(EnemyType type, Vector3 position)
+    {
+        GameObject enemyPrefab = GetEnemyPrefab(type);
+        GameObject enemy = Instantiate(enemyPrefab, position, Quaternion.identity);
+        IEnemy enemyComponent = enemy.GetComponent<IEnemy>();
+        enemyComponent.Initialize(position);
+        return enemyComponent;
+    }
+}
+
+public class EnemySpawner : MonoBehaviour
+{
+    [SerializeField] private EnemyFactory enemyFactory;
+    [SerializeField] private float spawnInterval = 5f;
+    [SerializeField] private int maxEnemies = 10;
+
+    private void SpawnEnemy()
+    {
+        Vector3 spawnPosition = GetRandomSpawnPosition();
+        EnemyType type = GetRandomEnemyType();
+        enemyFactory.CreateEnemy(type, spawnPosition);
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Düşman Oluşturma Sistemi</h3>
+                <ul>
+                    <li>🎯 <strong>Factory Pattern:</strong> Farklı düşman tiplerini oluşturma</li>
+                    <li>🔧 <strong>Spawner:</strong> Düşmanların düzenli olarak oyuna eklenmesi</li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Factory Özellikleri</h4>
+                    <ul>
+                        <li>Farklı düşman tipleri için prefab yönetimi</li>
+                        <li>Düşman başlatma ve konfigürasyon</li>
+                        <li>Tip bazlı düşman oluşturma</li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Spawner Özellikleri</h4>
+                    <ul>
+                        <li>Düzenli spawn aralıkları</li>
+                        <li>Maksimum düşman sayısı kontrolü</li>
+                        <li>Rastgele spawn pozisyonları</li>
+                        <li>Düşman tipi çeşitliliği</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="script-section">
+            <div class="script-header">
+                <h2>⚔️ Saldırı Stratejileri</h2>
+                <div class="tags">
+                    <span class="tag">🗡️ Melee</span>
+                    <span class="tag">🏹 Ranged</span>
+                    <span class="tag">🎯 Strategy</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+public interface IAttackStrategy
+{
+    void Attack(Transform target, float accuracy);
+}
+
+public class MeleeAttackStrategy : IAttackStrategy
+{
+    public void Attack(Transform target, float accuracy)
+    {
+        // Yakın mesafe saldırı mantığı
+    }
+}
+
+public class RangedAttackStrategy : IAttackStrategy
+{
+    public void Attack(Transform target, float accuracy)
+    {
+        // Uzak mesafe saldırı mantığı
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Saldırı Sistemi</h3>
+                <ul>
+                    <li>🎯 <strong>Strategy Pattern:</strong> Farklı saldırı tiplerini yönetme</li>
+                    <li>🔧 <strong>Saldırı Tipleri:</strong>
+                        <ul>
+                            <li>Melee: Yakın mesafe saldırıları</li>
+                            <li>Ranged: Uzak mesafe saldırıları</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li>Modüler ve genişletilebilir saldırı sistemi</li>
+                        <li>İsabet oranı ve hasar hesaplamaları</li>
+                        <li>Farklı düşman tipleri için özelleştirilebilir</li>
+                        <li>Runtime'da değiştirilebilir saldırı stratejileri</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

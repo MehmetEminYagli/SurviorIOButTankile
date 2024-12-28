@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeleeEnemy Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>⚔️ MeleeEnemy Script</h1>
+        <p>Yakın Mesafe Düşman Sınıfı</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>⚔️ MeleeEnemy.cs</h2>
+                <div class="tags">
+                    <span class="tag">⚔️ Melee</span>
+                    <span class="tag">🤖 AI</span>
+                    <span class="tag">🎯 NavMesh</span>
+                    <span class="tag">👾 Enemy</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+public class MeleeEnemy : BaseEnemy
+{
+    protected override void Awake()
+    {
+        base.Awake();
+        attackStrategy = GetComponent<MeleeAttackStrategy>();
+        if (attackStrategy == null)
+        {
+            attackStrategy = gameObject.AddComponent<MeleeAttackStrategy>();
+        }
+
+        // Set default values for melee enemy
+        stoppingDistance = 2f;
+        attackRange = 2.5f;
+        accuracy = 0.9f;
+        moveSpeed = 7f;
+        agent.stoppingDistance = stoppingDistance;
+        agent.speed = moveSpeed;
+    }
+}</code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Sınıf Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Yakın dövüş düşman tipini temsil eder ve BaseEnemy'den türer</li>
+                    <li>🔧 <strong>Özellikler:</strong>
+                        <ul>
+                            <li>Yakın mesafe saldırı stratejisi</li>
+                            <li>Hızlı hareket kabiliyeti</li>
+                            <li>Kısa durma mesafesi</li>
+                            <li>Yüksek isabet oranı</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Varsayılan Değerler</h4>
+                    <ul>
+                        <li><strong>Hareket Ayarları:</strong>
+                            <ul>
+                                <li>stoppingDistance: Durma mesafesi (2)</li>
+                                <li>attackRange: Saldırı menzili (2.5)</li>
+                                <li>accuracy: İsabet oranı (0.9)</li>
+                                <li>moveSpeed: Hareket hızı (7)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Awake Metodu</h4>
+                    <pre><code class="language-csharp">
+protected override void Awake()
+{
+    // Base sınıf başlatma
+    // Saldırı stratejisi atama
+    // Varsayılan değerleri ayarlama
+    // NavMeshAgent konfigürasyonu
+}</code></pre>
+                    <ul>
+                        <li><strong>İşlemler:</strong>
+                            <ul>
+                                <li>Base sınıf Awake çağrısı</li>
+                                <li>MeleeAttackStrategy kontrolü ve ataması</li>
+                                <li>Varsayılan değerlerin ayarlanması</li>
+                                <li>NavMeshAgent ayarlarının güncellenmesi</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li><strong>Saldırı Stratejisi:</strong>
+                            <ul>
+                                <li>MeleeAttackStrategy otomatik ekleme</li>
+                                <li>Yakın mesafe saldırı davranışı</li>
+                                <li>Yüksek isabet oranı ile güçlü saldırılar</li>
+                            </ul>
+                        </li>
+                        <li><strong>Hareket Sistemi:</strong>
+                            <ul>
+                                <li>Hızlı takip ve yaklaşma</li>
+                                <li>Kısa durma mesafesi</li>
+                                <li>Agresif yaklaşım tarzı</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="unity-setup">
+                    <h4>🎮 Unity Editör Ayarları</h4>
+                    <ul>
+                        <li><strong>Gerekli Bileşenler:</strong>
+                            <ul>
+                                <li>NavMeshAgent (BaseEnemy'den)</li>
+                                <li>MeleeAttackStrategy (otomatik eklenir)</li>
+                                <li>Collider ve Rigidbody</li>
+                            </ul>
+                        </li>
+                        <li><strong>Önerilen Ayarlar:</strong>
+                            <ul>
+                                <li>NavMeshAgent hız ve ivme ayarları</li>
+                                <li>Uygun animasyon sistemi</li>
+                                <li>Çarpışma katmanları</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

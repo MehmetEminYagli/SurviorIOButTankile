@@ -3,133 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Scripts Documentation</title>
+    <title>Game Documentation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
     <style>
-        :root {
-            --primary-color: #7289da;
-            --secondary-color: #43b581;
-            --background-color: #2c2f33;
-            --code-bg: #23272a;
-            --text-color: #ffffff;
-            --section-bg: #36393f;
-            --border-color: #7289da;
-            --hover-color: #677bc4;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            background-image: linear-gradient(45deg, #2c2f33 25%, #23272a 25%, #23272a 50%, #2c2f33 50%, #2c2f33 75%, #23272a 75%, #23272a 100%);
-            background-size: 56.57px 56.57px;
-        }
-
-        header {
-            background-color: var(--code-bg);
-            color: var(--text-color);
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            border-bottom: 3px solid var(--primary-color);
+        .dropdown {
             position: relative;
-            overflow: hidden;
+            display: inline-block;
         }
 
-        header::before {
-            content: '';
+        .dropdown-content {
+            display: none;
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, var(--primary-color) 0%, transparent 100%);
-            opacity: 0.1;
+            background-color: #2d2d2d;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
         }
 
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 0.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
 
-        nav {
-            background-color: var(--code-bg);
-            padding: 1rem;
-            position: sticky;
-            top: 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            z-index: 100;
-            border-bottom: 2px solid var(--secondary-color);
+        .dropdown-content a {
+            color: #fff;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #3d3d3d;
+            border-radius: 5px;
         }
 
         .nav-links {
-            list-style: none;
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
+            gap: 20px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .nav-links > li {
+            position: relative;
         }
 
         .nav-links a {
-            color: var(--text-color);
+            color: #fff;
             text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            background-color: var(--section-bg);
-            border: 1px solid var(--border-color);
+            padding: 10px;
+            display: block;
         }
 
-        .nav-links a:hover {
-            background-color: var(--hover-color);
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        .nav-links > li > a {
+            font-weight: bold;
         }
 
-        main {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .overview-section {
-            background-color: var(--section-bg);
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-        }
-
-        .script-grid {
+        .overview-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
 
-        .script-card {
+        .overview-card {
             background-color: var(--code-bg);
             border-radius: 8px;
             padding: 1.5rem;
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
-        .script-card:hover {
+        .overview-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        .script-card h3 {
+        .overview-card h3 {
             color: var(--primary-color);
             margin-bottom: 1rem;
             display: flex;
@@ -137,195 +92,91 @@
             gap: 0.5rem;
         }
 
-        .script-card p {
-            margin-bottom: 1rem;
-            color: #ccc;
+        .overview-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+            flex-grow: 1;
         }
 
-        .script-card .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+        .overview-card li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
         }
 
-        .tag {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-        }
-
-        .view-docs {
-            display: inline-block;
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .view-docs:hover {
-            background-color: var(--hover-color);
-            transform: translateY(-2px);
-        }
-
-        .architecture-section {
-            margin-top: 3rem;
-        }
-
-        .architecture-section h2 {
+        .overview-card li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
             color: var(--primary-color);
-            margin-bottom: 1rem;
         }
 
-        .architecture-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
+        .view-button {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background-color: var(--primary-color);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+            border: 2px solid var(--primary-color);
+            margin-top: auto;
         }
 
-        .architecture-card {
-            background-color: var(--code-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .architecture-card h3 {
-            color: var(--secondary-color);
-            margin-bottom: 1rem;
-        }
-
-        .architecture-card ul {
-            list-style-position: inside;
-            color: #ccc;
+        .view-button:hover {
+            background-color: transparent;
+            color: var(--primary-color);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>🎮 Game Scripts Documentation</h1>
-        <p>Unity Oyun Geliştirme Projesi Kod Dokümantasyonu</p>
+        <h1>🎮 Game Documentation</h1>
+        <p>Oyun Sistemleri ve Scriptler</p>
     </header>
 
     <nav>
         <ul class="nav-links">
             <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
-            <li><a href="./playerController.html">🎮 PlayerController</a></li>
-            <li><a href="./playerMovement.html">🏃 PlayerMovement</a></li>
-            <li><a href="./dashController.html">⚡ DashController</a></li>
-            <li><a href="./groundChecker.html">🌍 GroundChecker</a></li>
-            <li><a href="./shootingSystem.html">🏹 Atış Sistemi</a></li>
-            <li><a href="./inputSystem.html">⌨️ Giriş Sistemi</a></li>
-            <li><a href="./materialScroller.html">🎨 Material Scroller</a></li>
-            <li><a href="./interfaces.html">📋 Interfaces</a></li>
+            <li class="dropdown">
+                <a href="#">👤 Player Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./playerMovement.html">🏃‍♂️ Player Movement</a>
+                    <a href="./dashController.html">⚡ Dash Controller</a>
+                    <a href="./groundChecker.html">🌍 Ground Checker</a>
+                    <a href="./shootingSystem.html">🎯 Shooting System</a>
+                    <a href="./projectile.html">💨 Projectile</a>
+                    <a href="./arrowProjectileStrategy.html">🏹 Arrow Strategy</a>
+                    <a href="./iPlayerInterfaces.html">🔗 Player Interfaces</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">👾 Enemy Scripts</a>
+                <div class="dropdown-content">
+                    <a href="./baseEnemy.html">👾 Base Enemy</a>
+                    <a href="./enemySpawner.html">🔄 Enemy Spawner</a>
+                    <a href="./enemyFactory.html">🏭 Enemy Factory</a>
+                    <a href="./enemyProjectile.html">🎯 Enemy Projectile</a>
+                    <a href="./meleeEnemy.html">⚔️ Melee Enemy</a>
+                    <a href="./rangedEnemy.html">🏹 Ranged Enemy</a>
+                    <a href="./meleeAttackStrategy.html">🗡️ Melee Strategy</a>
+                    <a href="./rangedAttackStrategy.html">🎯 Ranged Strategy</a>
+                    <a href="./iAttackStrategy.html">📋 Attack Strategy Interface</a>
+                    <a href="./iEnemy.html">📋 Enemy Interface</a>
+                </div>
+            </li>
         </ul>
     </nav>
 
     <main>
         <section class="overview-section">
-            <h2>📚 Proje Genel Bakış</h2>
-            <p>Bu dokümantasyon, Unity tabanlı oyun projesindeki script'leri ve sistemleri detaylı olarak açıklar. Modüler ve SOLID prensiplerine uygun tasarlanmış kod yapısı, geliştiricilere kolay entegrasyon ve genişletme imkanı sunar.</p>
-            
-            <div class="script-grid">
-                <div class="script-card">
-                    <h3>🎮 Player Controller</h3>
-                    <div class="tags">
-                        <span class="tag">Ana Kontrol</span>
-                        <span class="tag">Hareket</span>
-                        <span class="tag">Kontrol</span>
-                    </div>
-                    <p>Oyuncu karakterinin ana kontrol sistemi. Hareket, atış ve diğer sistemleri yönetir.</p>
-                    <a href="./playerController.html" class="view-docs">Dokümantasyonu Gör →</a>
-                </div>
-
-                <div class="script-card">
-                    <h3>🏃 Player Movement</h3>
-                    <div class="tags">
-                        <span class="tag">Fizik</span>
-                        <span class="tag">Hareket</span>
-                        <span class="tag">Rigidbody</span>
-                    </div>
-                    <p>Fizik tabanlı karakter hareketi sistemi. Smooth ve responsive hareket sağlar.</p>
-                    <a href="./playerMovement.html" class="view-docs">Dokümantasyonu Gör →</a>
-                </div>
-
-                <div class="script-card">
-                    <h3>⚡ Dash Controller</h3>
-                    <div class="tags">
-                        <span class="tag">Dash</span>
-                        <span class="tag">Yetenek</span>
-                        <span class="tag">Cooldown</span>
-                    </div>
-                    <p>Karaktere hızlı ilerleme yeteneği ekleyen sistem. Cooldown yönetimi içerir.</p>
-                    <a href="./dashController.html" class="view-docs">Dokümantasyonu Gör →</a>
-                </div>
-
-                <div class="script-card">
-                    <h3>🌍 Ground Checker</h3>
-                    <div class="tags">
-                        <span class="tag">Fizik</span>
-                        <span class="tag">Kontrol</span>
-                        <span class="tag">Çarpışma</span>
-                    </div>
-                    <p>Zemin teması ve kontrol sistemi. Fizik tabanlı çarpışma kontrolü sağlar.</p>
-                    <a href="./groundChecker.html" class="view-docs">Dokümantasyonu Gör →</a>
-                </div>
-
-                <div class="script-card">
-                    <h3>🏹 Shooting System</h3>
-                    <div class="tags">
-                        <span class="tag">Atış</span>
-                        <span class="tag">Strateji</span>
-                        <span class="tag">Mermi</span>
-                    </div>
-                    <p>Modüler atış sistemi. Farklı mermi tipleri için strateji pattern kullanır.</p>
-                    <a href="./shootingSystem.html" class="view-docs">Dokümantasyonu Gör →</a>
-                </div>
-
-                <div class="script-card">
-                    <h3>⌨️ Input System</h3>
-                    <div class="tags">
-                        <span class="tag">Input</span>
-                        <span class="tag">Kontrol</span>
-                        <span class="tag">Strateji</span>
-                    </div>
-                    <p>Çoklu platform giriş sistemi. Klavye ve joystick desteği sağlar.</p>
-                    <a href="./inputSystem.html" class="view-docs">Dokümantasyonu Gör →</a>
-                </div>
-
-                <div class="script-card">
-                    <h3>🎨 Material Scroller</h3>
-                    <div class="tags">
-                        <span class="tag">Materyal</span>
-                        <span class="tag">Animasyon</span>
-                        <span class="tag">Efekt</span>
-                    </div>
-                    <p>Materyal animasyon sistemi. Hareket bazlı texture kaydırma sağlar.</p>
-                    <a href="./materialScroller.html" class="view-docs">Dokümantasyonu Gör →</a>
-                </div>
-
-                <div class="script-card">
-                    <h3>📋 Interfaces</h3>
-                    <div class="tags">
-                        <span class="tag">Interface</span>
-                        <span class="tag">SOLID</span>
-                        <span class="tag">Modüler</span>
-                    </div>
-                    <p>Sistem arayüzleri ve soyutlamaları. SOLID prensiplerine uygun tasarım.</p>
-                    <a href="./interfaces.html" class="view-docs">Dokümantasyonu Gör →</a>
-                </div>
-            </div>
-        </section>
-
-        <section class="overview-section architecture-section">
-            <h2>🏗️ Sistem Mimarisi</h2>
-            <div class="architecture-grid">
-                <div class="architecture-card">
+            <h2>📚 Genel Bakış</h2>
+            <div class="overview-grid">
+                <div class="overview-card">
                     <h3>🎯 SOLID Prensipleri</h3>
                     <ul>
                         <li>Single Responsibility Principle</li>
@@ -336,27 +187,231 @@
                     </ul>
                 </div>
 
-                <div class="architecture-card">
+                <div class="overview-card">
                     <h3>🔄 Tasarım Desenleri</h3>
                     <ul>
                         <li>Strategy Pattern</li>
+                        <li>Factory Pattern</li>
                         <li>Dependency Injection</li>
                         <li>Interface-based Programming</li>
                         <li>Component-based Architecture</li>
                     </ul>
                 </div>
 
-                <div class="architecture-card">
+                <div class="overview-card">
                     <h3>🛠️ Modüler Yapı</h3>
                     <ul>
                         <li>Bağımsız Sistemler</li>
                         <li>Kolay Genişletilebilirlik</li>
                         <li>Test Edilebilir Kod</li>
                         <li>Yeniden Kullanılabilir Bileşenler</li>
+                        <li>Temiz ve Düzenli Kod Yapısı</li>
                     </ul>
                 </div>
             </div>
         </section>
+
+        <section class="scripts-section">
+            <h2>🎮 Player Scripts</h2>
+            <div class="overview-grid">
+                <div class="overview-card">
+                    <h3>🏃‍♂️ Player Movement</h3>
+                    <ul>
+                        <li>Fizik tabanlı karakter hareketi</li>
+                        <li>Smooth ve responsive kontrol</li>
+                        <li>Hız ve ivme ayarları</li>
+                        <li>Yön kontrolü ve rotasyon</li>
+                        <li>Rigidbody entegrasyonu</li>
+                    </ul>
+                    <a href="./playerMovement.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>⚡ Dash Controller</h3>
+                    <ul>
+                        <li>Hızlı hareket mekanizması</li>
+                        <li>Cooldown sistemi</li>
+                        <li>Dash efektleri</li>
+                        <li>Yön kontrolü</li>
+                        <li>Dash kuvveti ayarları</li>
+                    </ul>
+                    <a href="./dashController.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🌍 Ground Checker</h3>
+                    <ul>
+                        <li>Zemin teması kontrolü</li>
+                        <li>Physics.CheckSphere kullanımı</li>
+                        <li>Layer bazlı kontrol</li>
+                        <li>Hassasiyet ayarları</li>
+                        <li>Zıplama kontrolü</li>
+                    </ul>
+                    <a href="./groundChecker.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🎯 Shooting System</h3>
+                    <ul>
+                        <li>Mermi oluşturma sistemi</li>
+                        <li>Atış stratejileri</li>
+                        <li>Cooldown yönetimi</li>
+                        <li>Mermi fiziği</li>
+                        <li>Hasar sistemi</li>
+                    </ul>
+                    <a href="./shootingSystem.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>💨 Projectile</h3>
+                    <ul>
+                        <li>Mermi davranışları</li>
+                        <li>Fizik etkileşimleri</li>
+                        <li>Çarpışma tespiti</li>
+                        <li>Hasar verme</li>
+                        <li>Otomatik yok olma</li>
+                    </ul>
+                    <a href="./projectile.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🏹 Arrow Strategy</h3>
+                    <ul>
+                        <li>Ok atış stratejisi</li>
+                        <li>Yay mekanikleri</li>
+                        <li>Ok fiziği</li>
+                        <li>Nişan alma sistemi</li>
+                        <li>Özel efektler</li>
+                    </ul>
+                    <a href="./arrowProjectileStrategy.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🔗 Player Interfaces</h3>
+                    <ul>
+                        <li>Oyuncu arayüzleri</li>
+                        <li>Hareket kontrolleri</li>
+                        <li>Saldırı sistemleri</li>
+                        <li>Can yönetimi</li>
+                        <li>Yetenek sistemi</li>
+                    </ul>
+                    <a href="./iPlayerInterfaces.html" class="view-button">İncele</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="scripts-section">
+            <h2>👾 Enemy Scripts</h2>
+            <div class="overview-grid">
+                <div class="overview-card">
+                    <h3>👾 Base Enemy</h3>
+                    <ul>
+                        <li>Temel düşman davranışları</li>
+                        <li>NavMesh navigasyonu</li>
+                        <li>Can sistemi</li>
+                        <li>Hedef takibi</li>
+                        <li>Saldırı yönetimi</li>
+                    </ul>
+                    <a href="./baseEnemy.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🔄 Enemy Spawner</h3>
+                    <ul>
+                        <li>Düşman oluşturma sistemi</li>
+                        <li>Spawn noktası yönetimi</li>
+                        <li>Dalga sistemi</li>
+                        <li>Zorluk ayarları</li>
+                        <li>Spawn limitleri</li>
+                    </ul>
+                    <a href="./enemySpawner.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🏭 Enemy Factory</h3>
+                    <ul>
+                        <li>Düşman üretim sistemi</li>
+                        <li>Factory pattern</li>
+                        <li>Düşman tipleri</li>
+                        <li>Özelleştirme</li>
+                        <li>Prefab yönetimi</li>
+                    </ul>
+                    <a href="./enemyFactory.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🎯 Enemy Projectile</h3>
+                    <ul>
+                        <li>Düşman mermileri</li>
+                        <li>Hasar sistemi</li>
+                        <li>Fizik etkileşimleri</li>
+                        <li>Yok olma mekanizması</li>
+                        <li>Efekt yönetimi</li>
+                    </ul>
+                    <a href="./enemyProjectile.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>⚔️ Melee Enemy</h3>
+                    <ul>
+                        <li>Yakın dövüş düşmanı</li>
+                        <li>Saldırı menzili</li>
+                        <li>Hasar değerleri</li>
+                        <li>Takip davranışı</li>
+                        <li>Animasyon sistemi</li>
+                    </ul>
+                    <a href="./meleeEnemy.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🏹 Ranged Enemy</h3>
+                    <ul>
+                        <li>Uzak mesafe düşmanı</li>
+                        <li>Menzil kontrolü</li>
+                        <li>Nişan alma sistemi</li>
+                        <li>Mermi yönetimi</li>
+                        <li>Kaçış davranışı</li>
+                    </ul>
+                    <a href="./rangedEnemy.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🗡️ Melee Strategy</h3>
+                    <ul>
+                        <li>Yakın dövüş stratejisi</li>
+                        <li>Saldırı paternleri</li>
+                        <li>Combo sistemi</li>
+                        <li>Hasar hesaplama</li>
+                        <li>Vuruş efektleri</li>
+                    </ul>
+                    <a href="./meleeAttackStrategy.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>🎯 Ranged Strategy</h3>
+                    <ul>
+                        <li>Uzak mesafe stratejisi</li>
+                        <li>Atış paternleri</li>
+                        <li>Mermi tipleri</li>
+                        <li>İsabet sistemi</li>
+                        <li>Mermi efektleri</li>
+                    </ul>
+                    <a href="./rangedAttackStrategy.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>📋 Attack Strategy Interface</h3>
+                    <ul>
+                        <li>Saldırı stratejisi arayüzü</li>
+                        <li>Strateji deseni</li>
+                        <li>Saldırı metodları</li>
+                        <li>Parametre yönetimi</li>
+                        <li>Genişletilebilirlik</li>
+                    </ul>
+                    <a href="./iAttackStrategy.html" class="view-button">İncele</a>
+                </div>
+                <div class="overview-card">
+                    <h3>📋 Enemy Interface</h3>
+                    <ul>
+                        <li>Düşman arayüzü</li>
+                        <li>Temel metodlar</li>
+                        <li>Davranış tanımları</li>
+                        <li>Özellik yönetimi</li>
+                        <li>Tip güvenliği</li>
+                    </ul>
+                    <a href="./iEnemy.html" class="view-button">İncele</a>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
 </body>
 </html> 
