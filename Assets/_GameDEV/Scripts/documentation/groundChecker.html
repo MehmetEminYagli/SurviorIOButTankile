@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GroundChecker Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🌍 GroundChecker Script</h1>
+        <p>Zemin Teması ve Kontrol Sistemi</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li><a href="./playerController.html">🎮 PlayerController</a></li>
+            <li><a href="./playerMovement.html">🏃 PlayerMovement</a></li>
+            <li><a href="./dashController.html">⚡ DashController</a></li>
+            <li><a href="./groundChecker.html">🌍 GroundChecker</a></li>
+            <li><a href="./shootingSystem.html">🏹 Atış Sistemi</a></li>
+            <li><a href="./inputSystem.html">⌨️ Giriş Sistemi</a></li>
+            <li><a href="./materialScroller.html">🎨 Material Scroller</a></li>
+            <li><a href="./interfaces.html">📋 Interfaces</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>🌍 GroundChecker.cs ve IGroundChecker.cs</h2>
+                <div class="tags">
+                    <span class="tag">🎯 Fizik</span>
+                    <span class="tag">🌍 Zemin Kontrolü</span>
+                    <span class="tag">🔄 Çarpışma</span>
+                    <span class="tag">📋 Interface</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+// IGroundChecker.cs
+using UnityEngine;
+
+public interface IGroundChecker
+{
+    bool IsGrounded { get; }
+    void CheckGround();
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 IGroundChecker Arayüzü Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Zemin kontrolü için standart bir kontrat tanımlar</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>SOLID prensiplerinden Dependency Inversion'ı uygular</li>
+                            <li>Farklı zemin kontrol sistemleri için şablon sağlar</li>
+                            <li>Modüler ve genişletilebilir yapı sunar</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>🔄 Arayüz Üyeleri</h4>
+                    <ul>
+                        <li><strong>IsGrounded Property:</strong>
+                            <ul>
+                                <li>Tip: bool (get-only)</li>
+                                <li>Karakterin zemin üzerinde olup olmadığını bildirir</li>
+                                <li>Hareket ve fizik hesaplamaları için kullanılır</li>
+                            </ul>
+                        </li>
+                        <li><strong>CheckGround() Metodu:</strong>
+                            <ul>
+                                <li>Zemin kontrolünü gerçekleştirir</li>
+                                <li>IsGrounded değerini günceller</li>
+                                <li>Her frame'de çağrılabilir şekilde tasarlanmıştır</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+// GroundChecker.cs
+using UnityEngine;
+
+public class GroundChecker : MonoBehaviour, IGroundChecker
+{
+    [SerializeField] private Transform groundCheckPoint;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private LayerMask groundLayer;
+
+    public bool IsGrounded { get; private set; }
+
+    public void CheckGround()
+    {
+        IsGrounded = Physics.CheckSphere(groundCheckPoint.position, 
+            groundCheckRadius, groundLayer);
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 GroundChecker Sınıfı Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> IGroundChecker arayüzünü uygulayarak zemin kontrolünü gerçekleştirir</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>Physics.CheckSphere ile küresel çarpışma kontrolü</li>
+                            <li>Layer sistemi ile seçici kontrol</li>
+                            <li>MonoBehaviour'dan kalıtım alır</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Önemli Değişkenler</h4>
+                    <ul>
+                        <li><strong>groundCheckPoint:</strong> 
+                            <ul>
+                                <li>Zemin kontrolünün yapılacağı nokta</li>
+                                <li>Genellikle karakterin ayaklarının altında</li>
+                                <li>Transform referansı ile esnek konumlandırma</li>
+                            </ul>
+                        </li>
+                        <li><strong>groundCheckRadius (0.2f):</strong>
+                            <ul>
+                                <li>Kontrol küresi yarıçapı</li>
+                                <li>Küçük değer = Hassas kontrol</li>
+                                <li>Büyük değer = Daha geniş kontrol alanı</li>
+                            </ul>
+                        </li>
+                        <li><strong>groundLayer:</strong>
+                            <ul>
+                                <li>Zemin olarak kabul edilecek layer'lar</li>
+                                <li>LayerMask ile seçici kontrol</li>
+                                <li>Performans optimizasyonu</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 CheckGround Metodu</h4>
+                    <ul>
+                        <li><strong>İşleyiş:</strong>
+                            <ul>
+                                <li>Physics.CheckSphere ile küresel alan kontrolü</li>
+                                <li>Belirtilen katmanlarda çarpışma kontrolü</li>
+                                <li>IsGrounded property'sini günceller</li>
+                            </ul>
+                        </li>
+                        <li><strong>Kullanım:</strong>
+                            <ul>
+                                <li>PlayerController tarafından her frame çağrılır</li>
+                                <li>Hareket öncesi zemin kontrolü sağlar</li>
+                                <li>Havada hareket engelleme için kullanılır</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li>Unity'nin fizik sistemini verimli kullanır</li>
+                        <li>Layer sistemi ile performans optimizasyonu</li>
+                        <li>Basit ama etkili çarpışma kontrolü</li>
+                        <li>Diğer sistemlerle kolay entegrasyon</li>
+                        <li>Ayarlanabilir parametreler ile esnek yapı</li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🎮 Unity Editör Ayarları</h4>
+                    <ul>
+                        <li><strong>Ground Check Point:</strong>
+                            <ul>
+                                <li>Boş bir GameObject oluşturun</li>
+                                <li>Karakterin ayaklarının altına yerleştirin</li>
+                                <li>Bu scripte referans olarak atayın</li>
+                            </ul>
+                        </li>
+                        <li><strong>Ground Layer:</strong>
+                            <ul>
+                                <li>Zemin objelerine uygun layer atayın</li>
+                                <li>Bu layer'ı Ground Check Layer olarak seçin</li>
+                                <li>Gereksiz layer'ları kontrol dışı bırakın</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Copy button functionality
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

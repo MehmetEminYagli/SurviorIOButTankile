@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayerMovement Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🏃 PlayerMovement Script</h1>
+        <p>Fizik Tabanlı Karakter Hareketi</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li><a href="./playerController.html">🎮 PlayerController</a></li>
+            <li><a href="./playerMovement.html">🏃 PlayerMovement</a></li>
+            <li><a href="./dashController.html">⚡ DashController</a></li>
+            <li><a href="./groundChecker.html">🌍 GroundChecker</a></li>
+            <li><a href="./shootingSystem.html">🏹 Atış Sistemi</a></li>
+            <li><a href="./inputSystem.html">⌨️ Giriş Sistemi</a></li>
+            <li><a href="./materialScroller.html">🎨 Material Scroller</a></li>
+            <li><a href="./interfaces.html">📋 Interfaces</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>🏃 PlayerMovement.cs</h2>
+                <div class="tags">
+                    <span class="tag">🎯 Fizik Tabanlı</span>
+                    <span class="tag">🔄 Rigidbody</span>
+                    <span class="tag">🏃 Hareket</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour, IMoveable
+{
+    private Rigidbody rb;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            Debug.LogError("Rigidbody component is missing!");
+            enabled = false;
+        }
+    }
+
+    public void Move(Vector3 direction, float speed)
+    {
+        if (rb == null) return;
+        rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
+    }
+
+    public void Rotate(Vector3 direction)
+    {
+        if (rb == null) return;
+        if (direction != Vector3.zero)
+        {
+            Quaternion toRotation = Quaternion.LookRotation(direction, Vector3.up);
+            rb.rotation = Quaternion.Lerp(rb.rotation, toRotation, 
+                Time.fixedDeltaTime * 10f);
+        }
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Kod Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Karakterin fizik tabanlı hareketini ve dönüşünü yöneten script</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>IMoveable arayüzünü uygular</li>
+                            <li>Rigidbody komponenti kullanır</li>
+                            <li>Fizik tabanlı hareket için FixedDeltaTime kullanır</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>🔍 Move Metodu</h4>
+                    <ul>
+                        <li><strong>Parameterler:</strong> direction (yön vektörü), speed (hız)</li>
+                        <li><strong>İşlev:</strong> Karakteri belirtilen yön ve hızda hareket ettirir</li>
+                        <li><strong>Özellikler:</strong>
+                            <ul>
+                                <li>Fizik tabanlı hareket için MovePosition kullanır</li>
+                                <li>Time.fixedDeltaTime ile kare hızından bağımsız hareket</li>
+                                <li>Null kontrolü ile güvenli çalışma</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Rotate Metodu</h4>
+                    <ul>
+                        <li><strong>Parameterler:</strong> direction (dönüş yönü)</li>
+                        <li><strong>İşlev:</strong> Karakteri hareket yönüne doğru yumuşak şekilde döndürür</li>
+                        <li><strong>Özellikler:</strong>
+                            <ul>
+                                <li>Quaternion.Lerp ile yumuşak dönüş</li>
+                                <li>Vector3.up ile düzgün yönelim</li>
+                                <li>10f çarpanı ile dönüş hızı kontrolü</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li>Script, fizik motorunun avantajlarını kullanır (çarpışma, momentum)</li>
+                        <li>Yumuşak dönüşler sayesinde daha doğal karakter hareketi</li>
+                        <li>Hata kontrolü ve güvenlik önlemleri içerir</li>
+                        <li>PlayerController ile entegre çalışır</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Copy button functionality
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

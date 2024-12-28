@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input System Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>⌨️ Input System Script</h1>
+        <p>Oyuncu Giriş Sistemi</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li><a href="./playerController.html">🎮 PlayerController</a></li>
+            <li><a href="./playerMovement.html">🏃 PlayerMovement</a></li>
+            <li><a href="./dashController.html">⚡ DashController</a></li>
+            <li><a href="./groundChecker.html">🌍 GroundChecker</a></li>
+            <li><a href="./shootingSystem.html">🏹 Atış Sistemi</a></li>
+            <li><a href="./inputSystem.html">⌨️ Giriş Sistemi</a></li>
+            <li><a href="./materialScroller.html">🎨 Material Scroller</a></li>
+            <li><a href="./interfaces.html">📋 Interfaces</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>⌨️ Input System ve Implementasyonları</h2>
+                <div class="tags">
+                    <span class="tag">⌨️ Input</span>
+                    <span class="tag">🎮 Kontrol</span>
+                    <span class="tag">📋 Interface</span>
+                    <span class="tag">🔄 Strateji</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+// IInputHandler.cs
+using UnityEngine;
+
+public interface IInputHandler
+{
+    bool HasInput { get; }
+    Vector3 GetMovementInput();
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 IInputHandler Arayüzü Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Farklı giriş sistemleri için standart bir kontrat tanımlar</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>Strategy Pattern kullanımına olanak sağlar</li>
+                            <li>Klavye, Joystick gibi farklı giriş sistemleri için şablon sunar</li>
+                            <li>Platform bağımsız giriş yönetimi sağlar</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>🔄 Arayüz Üyeleri</h4>
+                    <ul>
+                        <li><strong>HasInput Property:</strong>
+                            <ul>
+                                <li>Aktif bir giriş olup olmadığını kontrol eder</li>
+                                <li>Giriş cihazının aktif olup olmadığını bildirir</li>
+                                <li>Giriş önceliği için kullanılır</li>
+                            </ul>
+                        </li>
+                        <li><strong>GetMovementInput() Metodu:</strong>
+                            <ul>
+                                <li>Hareket yönünü Vector3 olarak döndürür</li>
+                                <li>Normalize edilmiş hareket vektörü sağlar</li>
+                                <li>Platform bağımsız hareket verisi sunar</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+// JoystickInput.cs
+using UnityEngine;
+
+public class JoystickInput : IInputHandler
+{
+    private readonly Joystick _joystick;
+
+    public JoystickInput(Joystick joystick)
+    {
+        _joystick = joystick;
+    }
+
+    public bool HasInput => 
+        Mathf.Abs(_joystick.Horizontal) > 0.1f || 
+        Mathf.Abs(_joystick.Vertical) > 0.1f;
+
+    public Vector3 GetMovementInput()
+    {
+        return new Vector3(_joystick.Horizontal, 0f, _joystick.Vertical);
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+// KeyboardInput.cs
+using UnityEngine;
+
+public class KeyboardInput : IInputHandler
+{
+    public bool HasInput =>
+        Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) ||
+        Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D);
+
+    public Vector3 GetMovementInput()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        return new Vector3(horizontal, 0f, vertical).normalized;
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Input Implementasyonları Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Farklı giriş cihazları için özel implementasyonlar sağlar</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>IInputHandler arayüzünü uygular</li>
+                            <li>Cihaza özel giriş mantığı içerir</li>
+                            <li>Platform bağımsız çıktı sağlar</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ JoystickInput Sınıfı</h4>
+                    <ul>
+                        <li><strong>Özellikler:</strong>
+                            <ul>
+                                <li>Joystick referansı constructor'dan alınır</li>
+                                <li>0.1f deadzone ile hassasiyet kontrolü</li>
+                                <li>2D joystick verilerini 3D hareket vektörüne çevirir</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>⚙️ KeyboardInput Sınıfı</h4>
+                    <ul>
+                        <li><strong>Özellikler:</strong>
+                            <ul>
+                                <li>WASD tuşları ile kontrol</li>
+                                <li>Unity'nin Input sistemini kullanır</li>
+                                <li>Normalize edilmiş hareket vektörü sağlar</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li>Strategy Pattern ile kolay genişletilebilir yapı</li>
+                        <li>Platform bağımsız giriş sistemi</li>
+                        <li>Çoklu giriş cihazı desteği</li>
+                        <li>Modüler ve test edilebilir kod yapısı</li>
+                        <li>Kolay entegre edilebilir tasarım</li>
+                    </ul>
+                </div>
+
+                <div class="usage-example">
+                    <h4>🎮 Kullanım Örneği</h4>
+                    <pre><code class="language-csharp">
+// PlayerController içinde kullanımı
+private IInputHandler[] _inputHandlers;
+
+private void InitializeInputHandlers()
+{
+    _inputHandlers = new IInputHandler[]
+    {
+        new JoystickInput(joystick),
+        new KeyboardInput()
+    };
+}
+
+private Vector3 GetActiveInputDirection()
+{
+    foreach (var inputHandler in _inputHandlers)
+    {
+        if (inputHandler.HasInput)
+        {
+            return inputHandler.GetMovementInput();
+        }
+    }
+    return Vector3.zero;
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Copy button functionality
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

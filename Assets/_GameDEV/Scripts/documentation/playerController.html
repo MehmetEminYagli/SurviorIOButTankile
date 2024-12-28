@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayerController Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎮 PlayerController Script</h1>
+        <p>Ana Karakter Kontrol Sistemi</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li><a href="./playerController.html">🎮 PlayerController</a></li>
+            <li><a href="./playerMovement.html">🏃 PlayerMovement</a></li>
+            <li><a href="./dashController.html">⚡ DashController</a></li>
+            <li><a href="./groundChecker.html">🌍 GroundChecker</a></li>
+            <li><a href="./shootingSystem.html">🏹 Atış Sistemi</a></li>
+            <li><a href="./inputSystem.html">⌨️ Giriş Sistemi</a></li>
+            <li><a href="./materialScroller.html">🎨 Material Scroller</a></li>
+            <li><a href="./interfaces.html">📋 Interfaces</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>🎮 PlayerController.cs</h2>
+                <div class="tags">
+                    <span class="tag">🎮 Ana Kontrol</span>
+                    <span class="tag">🏃 Hareket</span>
+                    <span class="tag">🎯 Kontrol</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    [Header("Movement Settings")]
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private Joystick joystick;
+    [SerializeField] private Transform cameraTransform;
+
+    [SerializeField] private IMoveable _movement;
+    [SerializeField] private IGroundChecker _groundChecker;
+    [SerializeField] private IMaterialScroller _materialScroller;
+    [SerializeField] private DashController _dashController;
+    [SerializeField] private IInputHandler[] _inputHandlers;
+    [SerializeField] private IShooter _shooter;
+
+    private void Awake()
+    {
+        InitializeComponents();
+    }
+
+    private void InitializeComponents()
+    {
+        _movement = GetComponent<PlayerMovement>();
+        _groundChecker = GetComponent<GroundChecker>();
+        _materialScroller = GetComponent<MaterialScroller>();
+        _dashController = GetComponent<DashController>();
+        _shooter = GetComponent<ShootingSystem>();
+
+        _inputHandlers = new IInputHandler[]
+        {
+            new JoystickInput(joystick),
+            new KeyboardInput()
+        };
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ResetRotation();
+        }
+        if (Input.GetKeyDown(KeyCode.E) && _shooter != null)
+        {
+            HandleShooting();
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        HandleMovement();
+    }
+
+    private void HandleMovement()
+    {
+        _groundChecker.CheckGround();
+        if (!_groundChecker.IsGrounded) return;
+
+        Vector3 inputDirection = GetActiveInputDirection();
+        if (inputDirection.magnitude >= 0.1f)
+        {
+            Vector3 moveDirection = CalculateMoveDirection(inputDirection);
+            float currentSpeed = CalculateCurrentSpeed();
+
+            _movement.Move(moveDirection, currentSpeed);
+            _movement.Rotate(moveDirection);
+            _materialScroller.ScrollMaterial(moveDirection);
+        }
+    }
+
+    private void HandleShooting()
+    {
+        Vector3 shootDirection = transform.forward;
+        _shooter.Shoot(shootDirection);
+    }
+
+    private Vector3 GetActiveInputDirection()
+    {
+        foreach (var inputHandler in _inputHandlers)
+        {
+            if (inputHandler.HasInput)
+            {
+                return inputHandler.GetMovementInput();
+            }
+        }
+        return Vector3.zero;
+    }
+
+    private Vector3 CalculateMoveDirection(Vector3 inputDirection)
+    {
+        Vector3 cameraForward = cameraTransform.forward;
+        Vector3 cameraRight = cameraTransform.right;
+
+        cameraForward.y = 0f;
+        cameraRight.y = 0f;
+
+        return (cameraForward.normalized * inputDirection.z +
+                cameraRight.normalized * inputDirection.x).normalized;
+    }
+
+    private float CalculateCurrentSpeed()
+    {
+        return _dashController != null && _dashController.IsDashing
+            ? _dashController.DashSpeed
+            : moveSpeed;
+    }
+
+    private void ResetRotation()
+    {
+        transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 Kod Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Oyuncunun tüm hareketlerini ve aksiyonlarını yöneten ana kontrol scripti</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>Bağımlılık enjeksiyonu ile modüler yapı</li>
+                            <li>Çoklu giriş sistemi desteği (Joystick ve Klavye)</li>
+                            <li>Kamera bazlı hareket sistemi</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Önemli Bileşenler</h4>
+                    <ul>
+                        <li><strong>IMoveable:</strong> Hareket sistemi</li>
+                        <li><strong>IGroundChecker:</strong> Zemin kontrolü</li>
+                        <li><strong>IMaterialScroller:</strong> Materyal efektleri</li>
+                        <li><strong>DashController:</strong> Dash yeteneği</li>
+                        <li><strong>IShooter:</strong> Atış sistemi</li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Ana Metodlar</h4>
+                    <ul>
+                        <li><strong>HandleMovement():</strong>
+                            <ul>
+                                <li>Zemin kontrolü</li>
+                                <li>Giriş yönü hesaplama</li>
+                                <li>Hareket ve rotasyon uygulama</li>
+                                <li>Materyal efektlerini güncelleme</li>
+                            </ul>
+                        </li>
+                        <li><strong>HandleShooting():</strong>
+                            <ul>
+                                <li>Karakterin baktığı yöne ateş etme</li>
+                                <li>Atış sistemini tetikleme</li>
+                            </ul>
+                        </li>
+                        <li><strong>CalculateMoveDirection():</strong>
+                            <ul>
+                                <li>Kamera yönüne göre hareket hesaplama</li>
+                                <li>Y eksenini sıfırlayarak düzgün hareket</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li>SOLID prensiplerine uygun modüler tasarım</li>
+                        <li>Arayüzler üzerinden bağımlılık yönetimi</li>
+                        <li>Çoklu platform desteği (PC ve Mobil)</li>
+                        <li>Genişletilebilir giriş sistemi</li>
+                        <li>Kamera bazlı hareket ile daha iyi oyun deneyimi</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Copy button functionality
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DashController Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>⚡ DashController Script</h1>
+        <p>Hızlı Hareket (Dash) Mekanikleri</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li><a href="./playerController.html">🎮 PlayerController</a></li>
+            <li><a href="./playerMovement.html">🏃 PlayerMovement</a></li>
+            <li><a href="./dashController.html">⚡ DashController</a></li>
+            <li><a href="./groundChecker.html">🌍 GroundChecker</a></li>
+            <li><a href="./shootingSystem.html">🏹 Atış Sistemi</a></li>
+            <li><a href="./inputSystem.html">⌨️ Giriş Sistemi</a></li>
+            <li><a href="./materialScroller.html">🎨 Material Scroller</a></li>
+            <li><a href="./interfaces.html">📋 Interfaces</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>⚡ DashController.cs</h2>
+                <div class="tags">
+                    <span class="tag">⚡ Dash</span>
+                    <span class="tag">🎯 Yetenek</span>
+                    <span class="tag">⏱️ Cooldown</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+using System.Collections;
+using UnityEngine;
+
+public class DashController : MonoBehaviour
+{
+    public float dashSpeed = 10f;
+    public float dashDuration = 0.5f;
+    public float dashCooldown = 1.5f;
+
+    private bool isDashing = false;
+    private bool canDash = true;
+
+    public bool IsDashing => isDashing;
+    public float DashSpeed => dashSpeed;
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) && canDash)
+        {
+            StartCoroutine(Dash());
+        }
+    }
+
+    private IEnumerator Dash()
+    {
+        isDashing = true;
+        canDash = false;
+
+        yield return new WaitForSeconds(dashDuration);
+
+        isDashing = false;
+
+        yield return new WaitForSeconds(dashCooldown);
+        canDash = true;
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>���� Kod Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Karaktere hızlı ilerleme (dash) yeteneği ekleyen script</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>Coroutine kullanarak zamanlama kontrolü</li>
+                            <li>Space tuşu ile tetikleme</li>
+                            <li>Cooldown sistemi ile spam engelleme</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Önemli Değişkenler</h4>
+                    <ul>
+                        <li><strong>dashSpeed (10f):</strong> Dash sırasındaki hız çarpanı</li>
+                        <li><strong>dashDuration (0.5f):</strong> Dash'in süreceği süre</li>
+                        <li><strong>dashCooldown (1.5f):</strong> İki dash arasında beklenecek süre</li>
+                        <li><strong>isDashing:</strong> Dash durumunu kontrol eden bool</li>
+                        <li><strong>canDash:</strong> Dash yapılabilirlik durumu</li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Update Metodu</h4>
+                    <ul>
+                        <li><strong>İşlev:</strong> Space tuşuna basılmasını kontrol eder</li>
+                        <li><strong>Kontroller:</strong>
+                            <ul>
+                                <li>Space tuşuna basılma kontrolü</li>
+                                <li>Dash yapılabilirlik kontrolü</li>
+                                <li>Dash coroutine'ini başlatma</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>⚡ Dash Coroutine</h4>
+                    <ul>
+                        <li><strong>Aşamalar:</strong>
+                            <ul>
+                                <li>1. Dash durumunu aktifleştirme</li>
+                                <li>2. Dash süresini bekleme</li>
+                                <li>3. Dash'i deaktive etme</li>
+                                <li>4. Cooldown süresini bekleme</li>
+                                <li>5. Yeni dash için hazır hale getirme</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li>PlayerController ile entegre çalışır</li>
+                        <li>Dash sırasında normal hareket hızı yerine dashSpeed kullanılır</li>
+                        <li>Cooldown sistemi ile dengeli gameplay sağlar</li>
+                        <li>Coroutine kullanımı ile smooth geçişler</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Copy button functionality
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

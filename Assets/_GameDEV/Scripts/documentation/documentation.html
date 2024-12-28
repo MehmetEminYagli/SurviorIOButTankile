@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Scripts Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <style>
+        :root {
+            --primary-color: #7289da;
+            --secondary-color: #43b581;
+            --background-color: #2c2f33;
+            --code-bg: #23272a;
+            --text-color: #ffffff;
+            --section-bg: #36393f;
+            --border-color: #7289da;
+            --hover-color: #677bc4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            background-image: linear-gradient(45deg, #2c2f33 25%, #23272a 25%, #23272a 50%, #2c2f33 50%, #2c2f33 75%, #23272a 75%, #23272a 100%);
+            background-size: 56.57px 56.57px;
+        }
+
+        header {
+            background-color: var(--code-bg);
+            color: var(--text-color);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            border-bottom: 3px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--primary-color) 0%, transparent 100%);
+            opacity: 0.1;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        nav {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 100;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: var(--section-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-links a:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .overview-section {
+            background-color: var(--section-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .script-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .script-card {
+            background-color: var(--code-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .script-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .script-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .script-card p {
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+
+        .script-card .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+        }
+
+        .view-docs {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .view-docs:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .architecture-section {
+            margin-top: 3rem;
+        }
+
+        .architecture-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .architecture-card {
+            background-color: var(--code-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .architecture-card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .architecture-card ul {
+            list-style-position: inside;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎮 Game Scripts Documentation</h1>
+        <p>Unity Oyun Geliştirme Projesi Kod Dokümantasyonu</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li><a href="./playerController.html">🎮 PlayerController</a></li>
+            <li><a href="./playerMovement.html">🏃 PlayerMovement</a></li>
+            <li><a href="./dashController.html">⚡ DashController</a></li>
+            <li><a href="./groundChecker.html">🌍 GroundChecker</a></li>
+            <li><a href="./shootingSystem.html">🏹 Atış Sistemi</a></li>
+            <li><a href="./inputSystem.html">⌨️ Giriş Sistemi</a></li>
+            <li><a href="./materialScroller.html">🎨 Material Scroller</a></li>
+            <li><a href="./interfaces.html">📋 Interfaces</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="overview-section">
+            <h2>📚 Proje Genel Bakış</h2>
+            <p>Bu dokümantasyon, Unity tabanlı oyun projesindeki script'leri ve sistemleri detaylı olarak açıklar. Modüler ve SOLID prensiplerine uygun tasarlanmış kod yapısı, geliştiricilere kolay entegrasyon ve genişletme imkanı sunar.</p>
+            
+            <div class="script-grid">
+                <div class="script-card">
+                    <h3>🎮 Player Controller</h3>
+                    <div class="tags">
+                        <span class="tag">Ana Kontrol</span>
+                        <span class="tag">Hareket</span>
+                        <span class="tag">Kontrol</span>
+                    </div>
+                    <p>Oyuncu karakterinin ana kontrol sistemi. Hareket, atış ve diğer sistemleri yönetir.</p>
+                    <a href="./playerController.html" class="view-docs">Dokümantasyonu Gör →</a>
+                </div>
+
+                <div class="script-card">
+                    <h3>🏃 Player Movement</h3>
+                    <div class="tags">
+                        <span class="tag">Fizik</span>
+                        <span class="tag">Hareket</span>
+                        <span class="tag">Rigidbody</span>
+                    </div>
+                    <p>Fizik tabanlı karakter hareketi sistemi. Smooth ve responsive hareket sağlar.</p>
+                    <a href="./playerMovement.html" class="view-docs">Dokümantasyonu Gör →</a>
+                </div>
+
+                <div class="script-card">
+                    <h3>⚡ Dash Controller</h3>
+                    <div class="tags">
+                        <span class="tag">Dash</span>
+                        <span class="tag">Yetenek</span>
+                        <span class="tag">Cooldown</span>
+                    </div>
+                    <p>Karaktere hızlı ilerleme yeteneği ekleyen sistem. Cooldown yönetimi içerir.</p>
+                    <a href="./dashController.html" class="view-docs">Dokümantasyonu Gör →</a>
+                </div>
+
+                <div class="script-card">
+                    <h3>🌍 Ground Checker</h3>
+                    <div class="tags">
+                        <span class="tag">Fizik</span>
+                        <span class="tag">Kontrol</span>
+                        <span class="tag">Çarpışma</span>
+                    </div>
+                    <p>Zemin teması ve kontrol sistemi. Fizik tabanlı çarpışma kontrolü sağlar.</p>
+                    <a href="./groundChecker.html" class="view-docs">Dokümantasyonu Gör →</a>
+                </div>
+
+                <div class="script-card">
+                    <h3>🏹 Shooting System</h3>
+                    <div class="tags">
+                        <span class="tag">Atış</span>
+                        <span class="tag">Strateji</span>
+                        <span class="tag">Mermi</span>
+                    </div>
+                    <p>Modüler atış sistemi. Farklı mermi tipleri için strateji pattern kullanır.</p>
+                    <a href="./shootingSystem.html" class="view-docs">Dokümantasyonu Gör →</a>
+                </div>
+
+                <div class="script-card">
+                    <h3>⌨️ Input System</h3>
+                    <div class="tags">
+                        <span class="tag">Input</span>
+                        <span class="tag">Kontrol</span>
+                        <span class="tag">Strateji</span>
+                    </div>
+                    <p>Çoklu platform giriş sistemi. Klavye ve joystick desteği sağlar.</p>
+                    <a href="./inputSystem.html" class="view-docs">Dokümantasyonu Gör →</a>
+                </div>
+
+                <div class="script-card">
+                    <h3>🎨 Material Scroller</h3>
+                    <div class="tags">
+                        <span class="tag">Materyal</span>
+                        <span class="tag">Animasyon</span>
+                        <span class="tag">Efekt</span>
+                    </div>
+                    <p>Materyal animasyon sistemi. Hareket bazlı texture kaydırma sağlar.</p>
+                    <a href="./materialScroller.html" class="view-docs">Dokümantasyonu Gör →</a>
+                </div>
+
+                <div class="script-card">
+                    <h3>📋 Interfaces</h3>
+                    <div class="tags">
+                        <span class="tag">Interface</span>
+                        <span class="tag">SOLID</span>
+                        <span class="tag">Modüler</span>
+                    </div>
+                    <p>Sistem arayüzleri ve soyutlamaları. SOLID prensiplerine uygun tasarım.</p>
+                    <a href="./interfaces.html" class="view-docs">Dokümantasyonu Gör →</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="overview-section architecture-section">
+            <h2>🏗️ Sistem Mimarisi</h2>
+            <div class="architecture-grid">
+                <div class="architecture-card">
+                    <h3>🎯 SOLID Prensipleri</h3>
+                    <ul>
+                        <li>Single Responsibility Principle</li>
+                        <li>Open/Closed Principle</li>
+                        <li>Liskov Substitution Principle</li>
+                        <li>Interface Segregation Principle</li>
+                        <li>Dependency Inversion Principle</li>
+                    </ul>
+                </div>
+
+                <div class="architecture-card">
+                    <h3>🔄 Tasarım Desenleri</h3>
+                    <ul>
+                        <li>Strategy Pattern</li>
+                        <li>Dependency Injection</li>
+                        <li>Interface-based Programming</li>
+                        <li>Component-based Architecture</li>
+                    </ul>
+                </div>
+
+                <div class="architecture-card">
+                    <h3>🛠️ Modüler Yapı</h3>
+                    <ul>
+                        <li>Bağımsız Sistemler</li>
+                        <li>Kolay Genişletilebilirlik</li>
+                        <li>Test Edilebilir Kod</li>
+                        <li>Yeniden Kullanılabilir Bileşenler</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html> 

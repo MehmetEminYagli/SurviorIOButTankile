@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material Scroller Script - Game Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎨 Material Scroller Script</h1>
+        <p>Materyal Kaydırma ve Animasyon Sistemi</p>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="./documentation.html">🏠 Ana Sayfa</a></li>
+            <li><a href="./playerController.html">🎮 PlayerController</a></li>
+            <li><a href="./playerMovement.html">🏃 PlayerMovement</a></li>
+            <li><a href="./dashController.html">⚡ DashController</a></li>
+            <li><a href="./groundChecker.html">🌍 GroundChecker</a></li>
+            <li><a href="./shootingSystem.html">🏹 Atış Sistemi</a></li>
+            <li><a href="./inputSystem.html">⌨️ Giriş Sistemi</a></li>
+            <li><a href="./materialScroller.html">🎨 Material Scroller</a></li>
+            <li><a href="./interfaces.html">📋 Interfaces</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="script-section">
+            <div class="script-header">
+                <h2>🎨 MaterialScroller.cs ve IMaterialScroller.cs</h2>
+                <div class="tags">
+                    <span class="tag">🎨 Materyal</span>
+                    <span class="tag">🔄 Animasyon</span>
+                    <span class="tag">📋 Interface</span>
+                    <span class="tag">🎮 Görsel Efekt</span>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+// IMaterialScroller.cs
+using UnityEngine;
+
+public interface IMaterialScroller
+{
+    void ScrollMaterial(Vector3 direction);
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 IMaterialScroller Arayüzü Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> Materyal kaydırma işlemleri için standart bir kontrat tanımlar</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>Hareket yönüne bağlı materyal animasyonu sağlar</li>
+                            <li>Farklı materyal efektleri için şablon sunar</li>
+                            <li>Modüler ve genişletilebilir yapı sağlar</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>🔄 Arayüz Üyeleri</h4>
+                    <ul>
+                        <li><strong>ScrollMaterial(Vector3 direction) Metodu:</strong>
+                            <ul>
+                                <li>Hareket yönüne göre materyal offset'ini günceller</li>
+                                <li>Hareket hızına bağlı animasyon sağlar</li>
+                                <li>Görsel geri bildirim için kullanılır</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <button class="copy-button">Copy</button>
+                <pre><code class="language-csharp">
+// MaterialScroller.cs
+using UnityEngine;
+
+public class MaterialScroller : MonoBehaviour, IMaterialScroller
+{
+    [SerializeField] private Material targetMaterial;
+    [SerializeField] private float scrollSpeed = 1f;
+    [SerializeField] private string texturePropertyName = "_MainTex";
+
+    private Vector2 textureOffset;
+
+    private void Awake()
+    {
+        if (targetMaterial == null)
+        {
+            var renderer = GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                targetMaterial = renderer.material;
+            }
+        }
+    }
+
+    public void ScrollMaterial(Vector3 direction)
+    {
+        if (targetMaterial == null) return;
+
+        float xOffset = direction.x * scrollSpeed * Time.deltaTime;
+        float yOffset = direction.z * scrollSpeed * Time.deltaTime;
+
+        textureOffset = targetMaterial.GetTextureOffset(texturePropertyName);
+        textureOffset.x += xOffset;
+        textureOffset.y += yOffset;
+
+        targetMaterial.SetTextureOffset(texturePropertyName, textureOffset);
+    }
+}
+                </code></pre>
+            </div>
+
+            <div class="explanation-block">
+                <h3>📝 MaterialScroller Sınıfı Açıklaması</h3>
+                <ul>
+                    <li>🎯 <strong>Temel Amaç:</strong> IMaterialScroller arayüzünü uygulayarak materyal animasyonlarını yönetir</li>
+                    <li>🔧 <strong>Teknik Detaylar:</strong>
+                        <ul>
+                            <li>Unity'nin materyal sistemini kullanır</li>
+                            <li>Texture offset'i ile animasyon sağlar</li>
+                            <li>MonoBehaviour'dan kalıtım alır</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="method-item">
+                    <h4>⚙️ Önemli Değişkenler</h4>
+                    <ul>
+                        <li><strong>targetMaterial:</strong>
+                            <ul>
+                                <li>Animasyon uygulanacak materyal</li>
+                                <li>Editor üzerinden atanabilir</li>
+                                <li>Otomatik olarak Renderer'dan alınabilir</li>
+                            </ul>
+                        </li>
+                        <li><strong>scrollSpeed:</strong>
+                            <ul>
+                                <li>Materyal kaydırma hızı</li>
+                                <li>Varsayılan değer: 1f</li>
+                                <li>Editor üzerinden ayarlanabilir</li>
+                            </ul>
+                        </li>
+                        <li><strong>texturePropertyName:</strong>
+                            <ul>
+                                <li>Kaydırılacak texture property'sinin adı</li>
+                                <li>Varsayılan: "_MainTex"</li>
+                                <li>Farklı shader'lar için özelleştirilebilir</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="method-item">
+                    <h4>🔄 Önemli Metodlar</h4>
+                    <ul>
+                        <li><strong>Awake():</strong>
+                            <ul>
+                                <li>Materyal referansını kontrol eder</li>
+                                <li>Eksik materyal varsa Renderer'dan alır</li>
+                                <li>Başlangıç ayarlarını yapar</li>
+                            </ul>
+                        </li>
+                        <li><strong>ScrollMaterial(Vector3 direction):</strong>
+                            <ul>
+                                <li>Hareket yönüne göre offset hesaplar</li>
+                                <li>Delta time ile kare bağımsız animasyon</li>
+                                <li>Texture offset'ini günceller</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="implementation-notes">
+                    <h4>💡 Uygulama Notları</h4>
+                    <ul>
+                        <li>Performans için materyal instance kullanımı önerilir</li>
+                        <li>Shader'ın texture offset desteği olmalıdır</li>
+                        <li>Farklı materyal property'leri için özelleştirilebilir</li>
+                        <li>Hareket hızına bağlı dinamik animasyon</li>
+                        <li>Editor üzerinden kolay ayarlanabilir yapı</li>
+                    </ul>
+                </div>
+
+                <div class="usage-example">
+                    <h4>🎮 Unity Editor Ayarları</h4>
+                    <ul>
+                        <li><strong>Materyal Hazırlığı:</strong>
+                            <ul>
+                                <li>Texture Wrap Mode: Repeat olmalı</li>
+                                <li>Materyal shader'ı UV offset desteklemeli</li>
+                                <li>Materyal instance oluşturulmalı</li>
+                            </ul>
+                        </li>
+                        <li><strong>Component Ayarları:</strong>
+                            <ul>
+                                <li>Target Material: Kaydırılacak materyal</li>
+                                <li>Scroll Speed: Animasyon hızı</li>
+                                <li>Texture Property Name: Shader property adı</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Copy button functionality
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const codeBlock = this.nextElementSibling.querySelector('code');
+                    navigator.clipboard.writeText(codeBlock.textContent);
+                    
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

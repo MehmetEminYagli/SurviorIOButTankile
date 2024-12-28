@@ -1,0 +1,229 @@
+:root {
+    --primary-color: #7289da;
+    --secondary-color: #43b581;
+    --background-color: #2c2f33;
+    --code-bg: #23272a;
+    --text-color: #ffffff;
+    --section-bg: #36393f;
+    --border-color: #7289da;
+    --hover-color: #677bc4;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    background-image: linear-gradient(45deg, #2c2f33 25%, #23272a 25%, #23272a 50%, #2c2f33 50%, #2c2f33 75%, #23272a 75%, #23272a 100%);
+    background-size: 56.57px 56.57px;
+}
+
+header {
+    background-color: var(--code-bg);
+    color: var(--text-color);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    border-bottom: 3px solid var(--primary-color);
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, var(--primary-color) 0%, transparent 100%);
+    opacity: 0.1;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+nav {
+    background-color: var(--code-bg);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    z-index: 100;
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.nav-links a {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    background-color: var(--section-bg);
+    border: 1px solid var(--border-color);
+}
+
+.nav-links a:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.script-section {
+    background-color: var(--section-bg);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 1px solid var(--border-color);
+}
+
+.script-header {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.code-block {
+    background-color: var(--code-bg);
+    color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid var(--border-color);
+    font-family: 'Consolas', 'Monaco', monospace;
+    position: relative;
+}
+
+.code-block::before {
+    content: 'CODE';
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.25rem 1rem;
+    border-radius: 0 8px 0 8px;
+    font-size: 0.8em;
+}
+
+.explanation-block {
+    background-color: var(--code-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border: 1px solid var(--secondary-color);
+    position: relative;
+}
+
+.explanation-block::before {
+    content: 'EXPLANATION';
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 0.25rem 1rem;
+    border-radius: 0 8px 0 8px;
+    font-size: 0.8em;
+}
+
+.tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+h2, h3, h4 {
+    color: var(--primary-color);
+    margin: 1rem 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+ul {
+    list-style-position: inside;
+    padding-left: 1rem;
+}
+
+li {
+    margin: 0.5rem 0;
+}
+
+.copy-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 5rem;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.25rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: all 0.3s ease;
+}
+
+.copy-button:hover {
+    background-color: var(--hover-color);
+}
+
+.method-list {
+    list-style: none;
+}
+
+.method-item {
+    background-color: var(--code-bg);
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.implementation-notes {
+    background-color: var(--code-bg);
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .code-block, .explanation-block {
+        padding: 1rem;
+    }
+} 
