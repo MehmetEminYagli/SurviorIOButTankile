@@ -4,8 +4,7 @@ public class ShootingSystem : MonoBehaviour, IShooter
 {
     [Header("Spawn Settings")]
     [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private float spawnHeight = -8.7f;
-    [SerializeField] private float spawnForwardOffset = 1.5f;
+    [SerializeField] private Transform bulletSpawnPosition;
 
     [Header("Shooting Settings")]
     [SerializeField] private float shootCooldown = 0.5f;
@@ -32,7 +31,7 @@ public class ShootingSystem : MonoBehaviour, IShooter
         var projectileComponent = projectile.GetComponent<Projectile>();
         if (projectileComponent != null)
         {
-            // Her mermi için yeni bir strateji örneði oluþtur
+            // Her mermi iï¿½in yeni bir strateji ï¿½rneï¿½i oluï¿½tur
             IProjectileStrategy projectileStrategy = new ArrowProjectileStrategy();
             projectileComponent.Initialize(projectileStrategy);
             projectileStrategy.InitializeProjectile(projectile, spawnPosition, direction);
@@ -43,10 +42,9 @@ public class ShootingSystem : MonoBehaviour, IShooter
 
     private Vector3 CalculateSpawnPosition(Vector3 direction)
     {
-        Vector3 spawnPosition = playerTransform.position;
-        spawnPosition.y = spawnHeight;
+        Vector3 spawnPosition = bulletSpawnPosition.position;
         Vector3 normalizedDirection = direction.normalized;
-        spawnPosition += normalizedDirection * spawnForwardOffset;
+        spawnPosition += normalizedDirection;
         return spawnPosition;
     }
 }
