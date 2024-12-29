@@ -2,28 +2,77 @@ using UnityEngine;
 
 public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
 {
+    [Header("Projectile Settings")]
     [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private float projectileSpeed = 10f;
+    [SerializeField] private Transform projectileSpawnPoint;
+    [SerializeField] private float projectileSpeed = 15f;
     [SerializeField] private float maxSpreadAngle = 30f;
+    [SerializeField] private float targetHeightOffset = 1f; // Hedef yükseklik ofseti
+
+    private void Awake()
+    {
+        if (projectileSpawnPoint == null)
+        {
+            projectileSpawnPoint = transform;
+        }
+
+        if (projectilePrefab == null)
+        {
+            Debug.LogError("Projectile Prefab is not assigned on " + gameObject.name, this);
+        }
+    }
 
     public void Attack(Transform target, float accuracy)
     {
-        if (target == null) return;
-
-        Vector3 direction = (target.position - transform.position).normalized;
-        
-        // Calculate spread based on accuracy (higher accuracy = less spread)
-        float spread = maxSpreadAngle * (1f - accuracy);
-        float randomSpread = Random.Range(-spread, spread);
-        Quaternion rotation = Quaternion.Euler(0, randomSpread, 0) * Quaternion.LookRotation(direction);
-
-        GameObject projectile = Instantiate(projectilePrefab, transform.position, rotation);
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        if (rb != null)
+        if (target == null)
         {
-            rb.velocity = rotation * Vector3.forward * projectileSpeed;
+            Debug.LogWarning("Attack target is null!", this);
+            return;
         }
 
-        Destroy(projectile, 5f); // Destroy projectile after 5 seconds if it doesn't hit anything
+        if (projectilePrefab == null)
+        {
+            Debug.LogError("Cannot attack: Projectile Prefab is missing!", this);
+            return;
+        }
+
+        // Hedef pozisyonunu hesapla (yükseklik ofseti ile)
+        Vector3 targetPosition = target.position + Vector3.up * targetHeightOffset;
+
+        // Doğruluk oranına göre saçılmayı hesapla
+        float spread = maxSpreadAngle * (1f - accuracy);
+        Vector3 randomSpread = new Vector3(
+            Random.Range(-spread, spread),
+            Random.Range(-spread * 0.5f, spread * 0.5f),
+            Random.Range(-spread, spread)
+        );
+
+        // Saçılmayı hedef pozisyonuna uygula
+        targetPosition += randomSpread * 0.1f;
+
+        // Mermi rotasyonunu hesapla
+        Vector3 direction = (targetPosition - projectileSpawnPoint.position).normalized;
+        Quaternion rotation = Quaternion.LookRotation(direction);
+
+        // Mermiyi oluştur
+        GameObject projectileObj = Instantiate(
+            projectilePrefab,
+            projectileSpawnPoint.position,
+            rotation
+        );
+
+        // Mermi bileşenini al ve başlat
+        EnemyProjectile projectile = projectileObj.GetComponent<EnemyProjectile>();
+        if (projectile != null)
+        {
+            projectile.Initialize(targetPosition, projectileSpeed);
+        }
+        else
+        {
+            Debug.LogError("Projectile prefab does not have EnemyProjectile component!", this);
+            Destroy(projectileObj);
+        }
+
+        Debug.Log($"Enemy fired projectile at {target.name} with accuracy {accuracy}", this);
     }
 } 

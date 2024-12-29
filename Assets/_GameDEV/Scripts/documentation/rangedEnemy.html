@@ -62,20 +62,31 @@
                 <pre><code class="language-csharp">
 public class RangedEnemy : BaseEnemy
 {
-    protected override void Awake()
+    [Header("Ranged Settings")]
+    [SerializeField] private Transform projectileSpawnPoint;
+
+    private void Awake()
     {
-        base.Awake();
+        attackRange = 10f;
+        stoppingDistance = 8f;
+        accuracy = 0.7f;
+
         attackStrategy = GetComponent<RangedAttackStrategy>();
         if (attackStrategy == null)
         {
             attackStrategy = gameObject.AddComponent<RangedAttackStrategy>();
         }
 
-        // Set default values for ranged enemy
-        stoppingDistance = 10f;
-        attackRange = 15f;
-        accuracy = 0.7f;
-        agent.stoppingDistance = stoppingDistance;
+        var rangedStrategy = attackStrategy as RangedAttackStrategy;
+        if (rangedStrategy != null && projectileSpawnPoint != null)
+        {
+            // Set the projectile spawn point in the strategy
+            var field = typeof(RangedAttackStrategy).GetField("projectileSpawnPoint", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (field != null)
+            {
+                field.SetValue(rangedStrategy, projectileSpawnPoint);
+            }
+        }
     }
 }</code></pre>
             </div>
@@ -83,25 +94,31 @@ public class RangedEnemy : BaseEnemy
             <div class="explanation-block">
                 <h3>📝 Sınıf Açıklaması</h3>
                 <ul>
-                    <li>🎯 <strong>Temel Amaç:</strong> Uzak mesafe düşman tipini temsil eder ve BaseEnemy'den türer</li>
+                    <li>🎯 <strong>Temel Amaç:</strong> Uzaktan saldırı yapabilen düşman tipini tanımlar</li>
                     <li>🔧 <strong>Özellikler:</strong>
                         <ul>
+                            <li>BaseEnemy sınıfından kalıtım</li>
+                            <li>Özelleştirilebilir mermi çıkış noktası</li>
                             <li>Uzak mesafe saldırı stratejisi</li>
-                            <li>Mesafeli pozisyon alma</li>
-                            <li>Uzun menzilli saldırılar</li>
-                            <li>Dengeli isabet oranı</li>
+                            <li>Otomatik strateji yönetimi</li>
                         </ul>
                     </li>
                 </ul>
 
                 <div class="method-item">
-                    <h4>⚙️ Varsayılan Değerler</h4>
+                    <h4>⚙️ Temel Özellikler</h4>
                     <ul>
-                        <li><strong>Hareket Ayarları:</strong>
+                        <li><strong>Saldırı Ayarları:</strong>
                             <ul>
-                                <li>stoppingDistance: Durma mesafesi (10)</li>
-                                <li>attackRange: Saldırı menzili (15)</li>
+                                <li>attackRange: Saldırı menzili (10)</li>
+                                <li>stoppingDistance: Durma mesafesi (8)</li>
                                 <li>accuracy: İsabet oranı (0.7)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Bileşenler:</strong>
+                            <ul>
+                                <li>projectileSpawnPoint: Mermi çıkış noktası</li>
+                                <li>RangedAttackStrategy: Saldırı stratejisi</li>
                             </ul>
                         </li>
                     </ul>
@@ -109,21 +126,12 @@ public class RangedEnemy : BaseEnemy
 
                 <div class="method-item">
                     <h4>🔄 Awake Metodu</h4>
-                    <pre><code class="language-csharp">
-protected override void Awake()
-{
-    // Base sınıf başlatma
-    // Saldırı stratejisi atama
-    // Varsayılan değerleri ayarlama
-    // NavMeshAgent konfigürasyonu
-}</code></pre>
                     <ul>
-                        <li><strong>İşlemler:</strong>
+                        <li><strong>İşlevler:</strong>
                             <ul>
-                                <li>Base sınıf Awake çağrısı</li>
-                                <li>RangedAttackStrategy kontrolü ve ataması</li>
-                                <li>Varsayılan değerlerin ayarlanması</li>
-                                <li>NavMeshAgent ayarlarının güncellenmesi</li>
+                                <li>Varsayılan değerleri ayarlama</li>
+                                <li>Saldırı stratejisini başlatma</li>
+                                <li>Mermi çıkış noktasını yapılandırma</li>
                             </ul>
                         </li>
                     </ul>
@@ -132,18 +140,18 @@ protected override void Awake()
                 <div class="implementation-notes">
                     <h4>💡 Uygulama Notları</h4>
                     <ul>
-                        <li><strong>Saldırı Stratejisi:</strong>
+                        <li><strong>Strateji Yönetimi:</strong>
                             <ul>
-                                <li>RangedAttackStrategy otomatik ekleme</li>
-                                <li>Uzak mesafe saldırı davranışı</li>
-                                <li>Dengeli isabet oranı ile sürekli saldırılar</li>
+                                <li>Otomatik strateji ekleme</li>
+                                <li>Güvenli tip dönüşümü</li>
+                                <li>Reflection ile özel alan ayarlama</li>
                             </ul>
                         </li>
-                        <li><strong>Hareket Sistemi:</strong>
+                        <li><strong>Davranış Özellikleri:</strong>
                             <ul>
-                                <li>Mesafeli pozisyon alma</li>
-                                <li>Uzun durma mesafesi</li>
-                                <li>Stratejik yaklaşım tarzı</li>
+                                <li>Uzak mesafeden saldırı</li>
+                                <li>Güvenli mesafede durma</li>
+                                <li>Dengeli isabet oranı</li>
                             </ul>
                         </li>
                     </ul>

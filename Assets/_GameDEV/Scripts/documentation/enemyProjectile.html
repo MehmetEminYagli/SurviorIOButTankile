@@ -63,25 +63,100 @@
 [RequireComponent(typeof(Rigidbody))]
 public class EnemyProjectile : MonoBehaviour
 {
+    [Header("Projectile Settings")]
     [SerializeField] private float damage = 10f;
     [SerializeField] private float lifeTime = 5f;
+    [SerializeField] private float arcHeight = 2f;
+    [SerializeField] private bool rotateTowardsVelocity = true;
+    [SerializeField] private float rotationSpeed = 15f;
+
+    private Vector3 startPosition;
+    private Vector3 targetPosition;
+    private float totalTime;
+    private float elapsedTime;
+    private Rigidbody rb;
+    private bool isInitialized = false;
+    private float projectileSpeed;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        rb.useGravity = false;
+        rb.isKinematic = true;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+    }
 
     private void Start()
     {
         Destroy(gameObject, lifeTime);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    public void Initialize(Vector3 target, float speed)
     {
-        // Check if we hit a player
-        IHealth health = collision.gameObject.GetComponent<IHealth>();
+        startPosition = transform.position;
+        targetPosition = target;
+        projectileSpeed = speed;
+
+        float distance = Vector3.Distance(startPosition, targetPosition);
+        totalTime = distance / speed;
+        elapsedTime = 0f;
+
+        isInitialized = true;
+    }
+
+    private void Update()
+    {
+        if (!isInitialized) return;
+
+        elapsedTime += Time.deltaTime;
+        float normalizedTime = elapsedTime / totalTime;
+
+        if (normalizedTime >= 1f)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Vector3 currentPosition = Vector3.Lerp(startPosition, targetPosition, normalizedTime);
+        float height = Mathf.Sin(normalizedTime * Mathf.PI) * arcHeight;
+        currentPosition.y += height;
+
+        transform.position = currentPosition;
+
+        if (rotateTowardsVelocity)
+        {
+            Vector3 moveDirection;
+            if (normalizedTime < 1f)
+            {
+                Vector3 nextPosition = Vector3.Lerp(startPosition, targetPosition, Mathf.Min(1f, normalizedTime + 0.1f));
+                nextPosition.y += Mathf.Sin((normalizedTime + 0.1f) * Mathf.PI) * arcHeight;
+                moveDirection = (nextPosition - transform.position).normalized;
+            }
+            else
+            {
+                moveDirection = (targetPosition - transform.position).normalized;
+            }
+
+            if (moveDirection != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        IHealth health = other.GetComponent<IHealth>();
         if (health != null)
         {
             health.TakeDamage(damage);
+            Destroy(gameObject);
         }
-
-        // Destroy the projectile on any collision
-        Destroy(gameObject);
+        else if (!other.CompareTag("Enemy") && !other.CompareTag("Projectile"))
+        {
+            Destroy(gameObject);
+        }
     }
 }</code></pre>
             </div>
@@ -89,13 +164,13 @@ public class EnemyProjectile : MonoBehaviour
             <div class="explanation-block">
                 <h3>📝 Sınıf Açıklaması</h3>
                 <ul>
-                    <li>🎯 <strong>Temel Amaç:</strong> Düşmanların fırlattığı mermilerin davranışlarını ve hasar sistemini yönetir</li>
+                    <li>🎯 <strong>Temel Amaç:</strong> Düşmanların fırlattığı mermilerin parabolik hareket ve rotasyon davranışlarını yönetir</li>
                     <li>🔧 <strong>Özellikler:</strong>
                         <ul>
-                            <li>Otomatik yok olma sistemi</li>
-                            <li>Çarpışma tespiti</li>
-                            <li>Hasar verme mekanizması</li>
-                            <li>Fizik tabanlı hareket</li>
+                            <li>Parabolik hareket sistemi</li>
+                            <li>Yumuşak rotasyon kontrolü</li>
+                            <li>Fizik tabanlı çarpışma sistemi</li>
+                            <li>Otomatik temizleme mekanizması</li>
                         </ul>
                     </li>
                 </ul>
@@ -107,43 +182,37 @@ public class EnemyProjectile : MonoBehaviour
                             <ul>
                                 <li>damage: Verilen hasar miktarı (10)</li>
                                 <li>lifeTime: Mermi ömrü (5 saniye)</li>
-                            </ul>
-                        </li>
-                        <li><strong>Gerekli Bileşenler:</strong>
-                            <ul>
-                                <li>Rigidbody: Fizik tabanlı hareket için</li>
-                                <li>Collider: Çarpışma tespiti için (otomatik)</li>
+                                <li>arcHeight: Parabolik yükseklik (2)</li>
+                                <li>rotateTowardsVelocity: Hareket yönüne dönme</li>
+                                <li>rotationSpeed: Dönüş hızı (15)</li>
                             </ul>
                         </li>
                     </ul>
                 </div>
 
                 <div class="method-item">
-                    <h4>🔄 Temel Metodlar</h4>
-                    <pre><code class="language-csharp">
-private void Start()
-{
-    // Mermi ömrünü ayarlama ve otomatik yok etme
-}
-
-private void OnCollisionEnter(Collision collision)
-{
-    // Çarpışma kontrolü
-    // Hasar verme
-    // Mermiyi yok etme
-}</code></pre>
+                    <h4>🔄 Önemli Metodlar</h4>
                     <ul>
-                        <li><strong>Start:</strong>
+                        <li><strong>Initialize:</strong>
                             <ul>
-                                <li>Mermi ömrünü başlatma</li>
-                                <li>Otomatik yok etme zamanlaması</li>
+                                <li>Başlangıç ve hedef pozisyonlarını ayarlama</li>
+                                <li>Hareket hızını belirleme</li>
+                                <li>Toplam hareket süresini hesaplama</li>
                             </ul>
                         </li>
-                        <li><strong>OnCollisionEnter:</strong>
+                        <li><strong>Update:</strong>
                             <ul>
-                                <li>Çarpılan nesnenin sağlık kontrolü</li>
-                                <li>Hasar uygulama</li>
-                                <li>Mermiyi yok etme</li>
+                                <li>Parabolik hareket hesaplama</li>
+                                <li>Yükseklik değişimi kontrolü</li>
+                                <li>Rotasyon yönetimi</li>
+                                <li>Pozisyon güncelleme</li>
+                            </ul>
+                        </li>
+                        <li><strong>OnTriggerEnter:</strong>
+                            <ul>
+                                <li>Hasar verme kontrolü</li>
+                                <li>Çarpışma yönetimi</li>
+                                <li>Otomatik yok olma</li>
                             </ul>
                         </li>
                     </ul>
@@ -152,18 +221,18 @@ private void OnCollisionEnter(Collision collision)
                 <div class="implementation-notes">
                     <h4>💡 Uygulama Notları</h4>
                     <ul>
-                        <li><strong>Fizik Sistemi:</strong>
+                        <li><strong>Hareket Sistemi:</strong>
                             <ul>
-                                <li>Rigidbody ile fizik tabanlı hareket</li>
-                                <li>Çarpışma tespiti için Collider kullanımı</li>
-                                <li>Otomatik temizleme sistemi</li>
+                                <li>Lerp ile yumuşak hareket</li>
+                                <li>Sinüs fonksiyonu ile parabolik yörünge</li>
+                                <li>Hareket yönüne göre otomatik rotasyon</li>
                             </ul>
                         </li>
-                        <li><strong>Hasar Sistemi:</strong>
+                        <li><strong>Fizik Sistemi:</strong>
                             <ul>
-                                <li>IHealth arayüzü ile hasar verme</li>
-                                <li>Güvenli tip kontrolü</li>
-                                <li>Çarpışma sonrası temizleme</li>
+                                <li>Kinematik Rigidbody kullanımı</li>
+                                <li>Trigger bazlı çarpışma tespiti</li>
+                                <li>Otomatik temizleme mekanizması</li>
                             </ul>
                         </li>
                     </ul>

@@ -63,29 +63,43 @@
                 <pre><code class="language-csharp">
 public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
 {
+    [Header("Projectile Settings")]
     [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private float projectileSpeed = 10f;
+    [SerializeField] private Transform projectileSpawnPoint;
+    [SerializeField] private float projectileSpeed = 15f;
     [SerializeField] private float maxSpreadAngle = 30f;
+    [SerializeField] private float targetHeightOffset = 1f;
 
-    public void Attack(Transform target, float accuracy)
+    private float attackCooldown = 2f;
+    private float lastAttackTime;
+
+    public void Attack(Transform target)
     {
-        if (target == null) return;
+        if (Time.time - lastAttackTime < attackCooldown) return;
 
-        Vector3 direction = (target.position - transform.position).normalized;
-        
-        // Calculate spread based on accuracy (higher accuracy = less spread)
-        float spread = maxSpreadAngle * (1f - accuracy);
-        float randomSpread = Random.Range(-spread, spread);
-        Quaternion rotation = Quaternion.Euler(0, randomSpread, 0) * Quaternion.LookRotation(direction);
-
-        GameObject projectile = Instantiate(projectilePrefab, transform.position, rotation);
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        if (rb != null)
+        if (projectilePrefab != null && target != null)
         {
-            rb.velocity = rotation * Vector3.forward * projectileSpeed;
-        }
+            Vector3 targetPosition = target.position + Vector3.up * targetHeightOffset;
+            Vector3 spawnPosition = projectileSpawnPoint != null ? projectileSpawnPoint.position : transform.position;
 
-        Destroy(projectile, 5f); // Destroy projectile after 5 seconds
+            // Calculate random spread
+            float randomSpread = Random.Range(-maxSpreadAngle, maxSpreadAngle);
+            Vector3 direction = (targetPosition - spawnPosition).normalized;
+            Quaternion spreadRotation = Quaternion.Euler(0f, randomSpread, 0f);
+            direction = spreadRotation * direction;
+
+            // Instantiate and initialize projectile
+            GameObject projectileObj = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+            EnemyProjectile projectile = projectileObj.GetComponent<EnemyProjectile>();
+            
+            if (projectile != null)
+            {
+                Vector3 targetPos = spawnPosition + direction * Vector3.Distance(spawnPosition, targetPosition);
+                projectile.Initialize(targetPos, projectileSpeed);
+            }
+
+            lastAttackTime = Time.time;
+        }
     }
 }</code></pre>
             </div>
@@ -93,13 +107,13 @@ public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
             <div class="explanation-block">
                 <h3>📝 Sınıf Açıklaması</h3>
                 <ul>
-                    <li>🎯 <strong>Temel Amaç:</strong> Uzak mesafe düşmanlar için mermi tabanlı saldırı davranışını tanımlar</li>
+                    <li>🎯 <strong>Temel Amaç:</strong> Düşmanların uzaktan saldırı davranışını yöneten strateji sınıfı</li>
                     <li>🔧 <strong>Özellikler:</strong>
                         <ul>
-                            <li>IAttackStrategy arayüzü implementasyonu</li>
-                            <li>Mermi oluşturma ve fırlatma</li>
-                            <li>İsabet oranına göre yayılma hesaplama</li>
-                            <li>Fizik tabanlı mermi hareketi</li>
+                            <li>Parabolik mermi atış sistemi</li>
+                            <li>Rastgele yayılma açısı</li>
+                            <li>Özelleştirilebilir mermi çıkış noktası</li>
+                            <li>Hedef yükseklik ofseti</li>
                         </ul>
                     </li>
                 </ul>
@@ -110,8 +124,15 @@ public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
                         <li><strong>Mermi Ayarları:</strong>
                             <ul>
                                 <li>projectilePrefab: Mermi prefabı</li>
-                                <li>projectileSpeed: Mermi hızı (10)</li>
-                                <li>maxSpreadAngle: Maksimum sapma açısı (30)</li>
+                                <li>projectileSpawnPoint: Mermi çıkış noktası</li>
+                                <li>projectileSpeed: Mermi hızı (15)</li>
+                                <li>maxSpreadAngle: Maksimum yayılma açısı (30)</li>
+                                <li>targetHeightOffset: Hedef yükseklik ofseti (1)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Saldırı Ayarları:</strong>
+                            <ul>
+                                <li>attackCooldown: Saldırı bekleme süresi (2 saniye)</li>
                             </ul>
                         </li>
                     </ul>
@@ -119,28 +140,13 @@ public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
 
                 <div class="method-item">
                     <h4>🔄 Attack Metodu</h4>
-                    <pre><code class="language-csharp">
-public void Attack(Transform target, float accuracy)
-{
-    // Hedef kontrolü
-    // Yön hesaplama
-    // Sapma hesaplama
-    // Mermi oluşturma ve fırlatma
-}</code></pre>
                     <ul>
-                        <li><strong>Parametreler:</strong>
+                        <li><strong>İşlevler:</strong>
                             <ul>
-                                <li>target: Hedef Transform</li>
-                                <li>accuracy: İsabet oranı (0-1)</li>
-                            </ul>
-                        </li>
-                        <li><strong>İşlem Adımları:</strong>
-                            <ul>
-                                <li>Hedef geçerlilik kontrolü</li>
-                                <li>Hedef yönünü hesaplama</li>
-                                <li>İsabet oranına göre sapma hesaplama</li>
-                                <li>Mermi oluşturma ve hız verme</li>
-                                <li>Otomatik temizleme ayarlama</li>
+                                <li>Bekleme süresi kontrolü</li>
+                                <li>Hedef pozisyon hesaplama</li>
+                                <li>Rastgele yayılma açısı uygulama</li>
+                                <li>Mermi oluşturma ve başlatma</li>
                             </ul>
                         </li>
                     </ul>
@@ -151,70 +157,19 @@ public void Attack(Transform target, float accuracy)
                     <ul>
                         <li><strong>Mermi Sistemi:</strong>
                             <ul>
-                                <li>Fizik tabanlı mermi hareketi</li>
-                                <li>Otomatik mermi temizleme</li>
-                                <li>İsabet oranına göre sapma</li>
+                                <li>Özelleştirilebilir çıkış noktası</li>
+                                <li>Parabolik hareket için hedef yükseklik ofseti</li>
+                                <li>Rastgele yayılma ile isabetsizlik simülasyonu</li>
                             </ul>
                         </li>
-                        <li><strong>Optimizasyon:</strong>
+                        <li><strong>Performans:</strong>
                             <ul>
-                                <li>Erken çıkış kontrolleri</li>
-                                <li>Null kontrolleri</li>
-                                <li>Otomatik mermi yok etme</li>
+                                <li>Cooldown sistemi ile optimizasyon</li>
+                                <li>Null kontrolleri ile güvenli çalışma</li>
+                                <li>Verimli mermi yönetimi</li>
                             </ul>
                         </li>
                     </ul>
-                </div>
-
-                <div class="unity-setup">
-                    <h4>🎮 Unity Editör Ayarları</h4>
-                    <ul>
-                        <li><strong>Gerekli Bileşenler:</strong>
-                            <ul>
-                                <li>Projectile Prefab</li>
-                                <li>Rigidbody (mermi için)</li>
-                                <li>Collider (mermi için)</li>
-                            </ul>
-                        </li>
-                        <li><strong>Ayarlanabilir Değerler:</strong>
-                            <ul>
-                                <li>Mermi hızı</li>
-                                <li>Sapma açısı</li>
-                                <li>Mermi prefabı</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="comparison">
-                    <h4>🔄 MeleeAttackStrategy ile Karşılaştırma</h4>
-                    <table>
-                        <tr>
-                            <th>Özellik</th>
-                            <th>RangedAttackStrategy</th>
-                            <th>MeleeAttackStrategy</th>
-                        </tr>
-                        <tr>
-                            <td>Saldırı Tipi</td>
-                            <td>Mermi Bazlı</td>
-                            <td>Doğrudan Hasar</td>
-                        </tr>
-                        <tr>
-                            <td>Menzil</td>
-                            <td>Uzun (15+ birim)</td>
-                            <td>Kısa (1.5 birim)</td>
-                        </tr>
-                        <tr>
-                            <td>İsabet Mekanizması</td>
-                            <td>Sapma Açısı</td>
-                            <td>Mesafe Kontrolü</td>
-                        </tr>
-                        <tr>
-                            <td>Özel Gereksinim</td>
-                            <td>Mermi Prefabı</td>
-                            <td>Yok</td>
-                        </tr>
-                    </table>
                 </div>
             </div>
         </section>

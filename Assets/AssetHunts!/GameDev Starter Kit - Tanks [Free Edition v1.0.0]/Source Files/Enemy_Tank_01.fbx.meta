@@ -3,7 +3,17 @@ guid: 15918f981db4407428a6a9bbcb3c4629
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Enemy_Tank_01_Body
+    second: {fileID: 2100000, guid: 026c30072eda46840827558e7d1273b8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Enemy_Tank_01_Track
+    second: {fileID: 2100000, guid: a9bf4eed8c949c3489bdc3d64e5f742c, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
