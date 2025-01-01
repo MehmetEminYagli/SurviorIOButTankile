@@ -25,7 +25,7 @@ public class RangedEnemy : BaseEnemy
             spawnPoint.transform.SetParent(transform);
             spawnPoint.transform.localPosition = Vector3.forward + Vector3.up; // Düşmanın önünde ve biraz yukarıda
             projectileSpawnPoint = spawnPoint.transform;
-            Debug.Log("Created ProjectileSpawnPoint for " + gameObject.name);
+         
         }
 
         // RangedAttackStrategy'ye spawn point'i ata

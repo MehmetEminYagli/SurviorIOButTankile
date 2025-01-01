@@ -73,6 +73,6 @@ public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
             Destroy(projectileObj);
         }
 
-        Debug.Log($"Enemy fired projectile at {target.name} with accuracy {accuracy}", this);
+       
     }
 } 
