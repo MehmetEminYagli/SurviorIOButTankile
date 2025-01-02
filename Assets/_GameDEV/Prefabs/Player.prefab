@@ -336,9 +336,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da363ad9b7de7be4eaadf769182ff1c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 5398218537031604240, guid: ba2c5f19fecade44c82168c74b8340e7, type: 3}
+  ShowTopMostFoldoutHeaderGroup: 1
+  projectilePrefab: {fileID: 688228698229397355, guid: ba2c5f19fecade44c82168c74b8340e7, type: 3}
   bulletSpawnPosition: {fileID: 8290343293014403987}
   shootCooldown: 0.5
+  projectileSpeed: 20
 --- !u!114 &5291366387661881400
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -420,7 +422,7 @@ Transform:
   m_GameObject: {fileID: 3000800368218849443}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -8.7, z: 0.1}
+  m_LocalPosition: {x: 0, y: 1.16, z: 0.767}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

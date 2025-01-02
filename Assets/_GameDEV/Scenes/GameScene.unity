@@ -1321,7 +1321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e183fd89bb1b8a642a3dbc4699e08ce2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rangedEnemyPrefab: {fileID: 5788439261300901376, guid: 930374c1e9c862246918005f4b32688e, type: 3}
+  rangedEnemyPrefab: {fileID: 4269533182597920420, guid: f4bb18186e9b5a847865b8e2fcc577d9, type: 3}
   meleeEnemyPrefab: {fileID: 4269533182597920420, guid: f4bb18186e9b5a847865b8e2fcc577d9, type: 3}
 --- !u!114 &950691502
 MonoBehaviour:
@@ -1947,6 +1947,7 @@ MonoBehaviour:
     NetworkTopology: 0
     UseCMBService: 0
     AutoSpawnPlayerPrefabClientSide: 1
+    NetworkMessageMetrics: 1
     NetworkProfilingMetrics: 1
     OldPrefabList: []
   RunInBackground: 1

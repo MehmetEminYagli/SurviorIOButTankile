@@ -1,50 +1,65 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class ShootingSystem : MonoBehaviour, IShooter
+public class ShootingSystem : NetworkBehaviour, IShooter
 {
     [Header("Spawn Settings")]
-    [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private Transform bulletSpawnPosition;
+    [SerializeField] private NetworkObject projectilePrefab;
 
     [Header("Shooting Settings")]
     [SerializeField] private float shootCooldown = 0.5f;
+    [SerializeField] private float projectileSpeed = 20f;
 
     private float lastShootTime;
-    private Transform playerTransform;
-
-    private void Awake()
-    {
-        playerTransform = transform;
-    }
 
     public bool CanShoot => Time.time - lastShootTime >= shootCooldown;
 
-    public void Shoot(Vector3 direction)
+    public void Shoot(Vector3 direction, Vector3 spawnPosition)
     {
         if (!CanShoot) return;
 
-        Vector3 spawnPosition = CalculateSpawnPosition(direction);
-
-        GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-        Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
-
-        var projectileComponent = projectile.GetComponent<Projectile>();
-        if (projectileComponent != null)
+        if (IsServer)
         {
-            // Her mermi i�in yeni bir strateji �rne�i olu�tur
-            IProjectileStrategy projectileStrategy = new ArrowProjectileStrategy();
-            projectileComponent.Initialize(projectileStrategy);
-            projectileStrategy.InitializeProjectile(projectile, spawnPosition, direction);
+            SpawnProjectile(direction, spawnPosition);
+        }
+        else if (IsClient)
+        {
+            SpawnProjectileServerRpc(direction, spawnPosition);
         }
 
         lastShootTime = Time.time;
     }
 
-    private Vector3 CalculateSpawnPosition(Vector3 direction)
+    [ServerRpc(RequireOwnership = false)]
+    private void SpawnProjectileServerRpc(Vector3 direction, Vector3 spawnPosition)
     {
-        Vector3 spawnPosition = bulletSpawnPosition.position;
-        Vector3 normalizedDirection = direction.normalized;
-        spawnPosition += normalizedDirection;
-        return spawnPosition;
+        SpawnProjectile(direction, spawnPosition);
+    }
+
+    private void SpawnProjectile(Vector3 direction, Vector3 spawnPosition)
+    {
+        if (!IsServer) return;
+
+        NetworkObject projectileInstance = Instantiate(projectilePrefab, spawnPosition, Quaternion.LookRotation(direction));
+        
+        if (projectileInstance != null)
+        {
+            NetworkProjectile networkProjectile = projectileInstance.GetComponent<NetworkProjectile>();
+            if (networkProjectile != null)
+            {
+                projectileInstance.Spawn();
+                networkProjectile.Initialize(direction.normalized * projectileSpeed);
+                
+                // Spawn olan oyuncunun collider'ını ignore et
+                if (TryGetComponent<Collider>(out var playerCollider))
+                {
+                    Physics.IgnoreCollision(projectileInstance.GetComponent<Collider>(), playerCollider, true);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("Failed to instantiate projectile!");
+        }
     }
 }

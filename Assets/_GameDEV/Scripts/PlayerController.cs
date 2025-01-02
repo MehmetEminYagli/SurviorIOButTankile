@@ -116,8 +116,12 @@ public class PlayerController : MonoBehaviour
 
     private void HandleShooting()
     {
-        Vector3 shootDirection = transform.forward;
-        _shooter.Shoot(shootDirection);
+        if (_shooter != null && _shooter.CanShoot)
+        {
+            Vector3 shootDirection = transform.forward;
+            Vector3 spawnPosition = transform.position + (transform.forward * 1.5f) + (Vector3.up * 0.5f);
+            _shooter.Shoot(shootDirection, spawnPosition);
+        }
     }
 
     private Vector3 GetActiveInputDirection()

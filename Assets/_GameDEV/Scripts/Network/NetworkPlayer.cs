@@ -131,17 +131,25 @@ public class NetworkPlayer : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void ShootServerRpc(Vector3 direction)
+    private void ShootServerRpc(Vector3 direction, Vector3 spawnPosition)
     {
-        ShootClientRpc(direction);
+        // Server'da mermiyi oluştur
+        if (shootingSystem != null)
+        {
+            shootingSystem.Shoot(direction, spawnPosition);
+        }
+        
+        // Diğer clientlara bildir
+        ShootClientRpc(direction, spawnPosition);
     }
 
     [ClientRpc]
-    private void ShootClientRpc(Vector3 direction)
+    private void ShootClientRpc(Vector3 direction, Vector3 spawnPosition)
     {
+        // Mermiyi atan oyuncu hariç diğer clientlarda mermiyi oluştur
         if (!IsOwner && shootingSystem != null)
         {
-            shootingSystem.Shoot(direction);
+            shootingSystem.Shoot(direction, spawnPosition);
         }
     }
 
@@ -152,6 +160,15 @@ public class NetworkPlayer : NetworkBehaviour
             // Interpolate remote player position and rotation
             playerTransform.position = Vector3.Lerp(playerTransform.position, networkPosition.Value, Time.deltaTime * 10f);
             playerTransform.rotation = Quaternion.Lerp(playerTransform.rotation, networkRotation.Value, Time.deltaTime * 10f);
+            return;
+        }
+
+        // Handle shooting input for the owner
+        if (Input.GetKeyDown(KeyCode.E) && shootingSystem != null && shootingSystem.CanShoot)
+        {
+            Vector3 shootDirection = playerTransform.forward;
+            Vector3 spawnPosition = playerTransform.position + (playerTransform.forward * 1.5f) + (Vector3.up * 0.5f);
+            ShootServerRpc(shootDirection, spawnPosition);
         }
     }
 
