@@ -147,11 +147,11 @@ GameObject:
   - component: {fileID: 6184589752700955554}
   - component: {fileID: 3790630474590495582}
   - component: {fileID: 3819351716425556703}
+  - component: {fileID: 6706339991342299562}
   - component: {fileID: 1555969611664723361}
   - component: {fileID: 984506789104149701}
   - component: {fileID: 5291366387661881400}
   - component: {fileID: 1815984939727734273}
-  - component: {fileID: 6706339991342299562}
   - component: {fileID: 4190216849694864141}
   m_Layer: 6
   m_Name: Player
@@ -277,6 +277,31 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
+--- !u!114 &6706339991342299562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1342975682272047854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 4165846224
+  InScenePlacedSourceGlobalObjectIdHash: 3030967865
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &1555969611664723361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,10 +314,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3c23e402f39f934e90b1182d8af6083, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  materials:
-  - {fileID: 2100000, guid: dab5ccc36bb92254d97f6312175d1d21, type: 2}
-  - {fileID: 2100000, guid: 69b8d43a9c942ca45b86d55be4f1ec0e, type: 2}
-  offsetSpeed: -0.01
+  ShowTopMostFoldoutHeaderGroup: 1
+  offsetSpeed: -3
+  leftTrack:
+    originalMaterial: {fileID: 2100000, guid: dab5ccc36bb92254d97f6312175d1d21, type: 2}
+    targetRenderer: {fileID: 5478688307465104568}
+    materialIndex: 0
+  rightTrack:
+    originalMaterial: {fileID: 2100000, guid: 69b8d43a9c942ca45b86d55be4f1ec0e, type: 2}
+    targetRenderer: {fileID: 872079286526101670}
+    materialIndex: 0
 --- !u!114 &984506789104149701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -347,31 +378,6 @@ MonoBehaviour:
   onDeath:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &6706339991342299562
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1342975682272047854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4165846224
-  InScenePlacedSourceGlobalObjectIdHash: 3030967865
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &4190216849694864141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -556,9 +562,19 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 32b6452f6866da2418967f9320d04ceb, type: 3}
+--- !u!23 &872079286526101670 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 358780086534050858, guid: 32b6452f6866da2418967f9320d04ceb, type: 3}
+  m_PrefabInstance: {fileID: 639682584515042444}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3676523989539015582 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4315918477310891794, guid: 32b6452f6866da2418967f9320d04ceb, type: 3}
+  m_PrefabInstance: {fileID: 639682584515042444}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &5478688307465104568 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4965410002489503796, guid: 32b6452f6866da2418967f9320d04ceb, type: 3}
   m_PrefabInstance: {fileID: 639682584515042444}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2357734539634414133
