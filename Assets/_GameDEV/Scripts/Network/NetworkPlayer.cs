@@ -115,8 +115,12 @@ public class NetworkPlayer : NetworkBehaviour
 
     private void SyncTransform()
     {
-        if (!IsOwner) return;
-        UpdateTransformServerRpc(playerTransform.position, playerTransform.rotation);
+      if (!IsOwner) return;
+    // Daha az ağ trafiği için threshold ekleyin
+    if (Vector3.Distance(networkPosition.Value, transform.position) > 0.1f)
+    {
+        UpdateTransformServerRpc(transform.position, transform.rotation);
+    }
     }
 
     [ServerRpc]

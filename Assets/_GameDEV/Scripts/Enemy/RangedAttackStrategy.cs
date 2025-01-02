@@ -1,13 +1,14 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
+public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
 {
     [Header("Projectile Settings")]
-    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private NetworkObject projectilePrefab;
     [SerializeField] private Transform projectileSpawnPoint;
     [SerializeField] private float projectileSpeed = 15f;
     [SerializeField] private float maxSpreadAngle = 30f;
-    [SerializeField] private float targetHeightOffset = 1f; // Hedef yükseklik ofseti
+    [SerializeField] private float targetHeightOffset = 1f;
 
     private void Awake()
     {
@@ -24,11 +25,25 @@ public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
 
     public void Attack(Transform target, float accuracy)
     {
-        if (target == null)
+        if (!IsServer)
         {
-            Debug.LogWarning("Attack target is null!", this);
+            // Client tarafında attack çağrıldıysa, server'a RPC gönder
+            AttackServerRpc(target.position, accuracy);
             return;
         }
+
+        SpawnProjectile(target.position, accuracy);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void AttackServerRpc(Vector3 targetPosition, float accuracy)
+    {
+        SpawnProjectile(targetPosition, accuracy);
+    }
+
+    private void SpawnProjectile(Vector3 targetPosition, float accuracy)
+    {
+        if (!IsServer) return;
 
         if (projectilePrefab == null)
         {
@@ -37,7 +52,7 @@ public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
         }
 
         // Hedef pozisyonunu hesapla (yükseklik ofseti ile)
-        Vector3 targetPosition = target.position + Vector3.up * targetHeightOffset;
+        Vector3 targetPos = targetPosition + Vector3.up * targetHeightOffset;
 
         // Doğruluk oranına göre saçılmayı hesapla
         float spread = maxSpreadAngle * (1f - accuracy);
@@ -48,31 +63,26 @@ public class RangedAttackStrategy : MonoBehaviour, IAttackStrategy
         );
 
         // Saçılmayı hedef pozisyonuna uygula
-        targetPosition += randomSpread * 0.1f;
+        targetPos += randomSpread * 0.1f;
 
         // Mermi rotasyonunu hesapla
-        Vector3 direction = (targetPosition - projectileSpawnPoint.position).normalized;
+        Vector3 direction = (targetPos - projectileSpawnPoint.position).normalized;
         Quaternion rotation = Quaternion.LookRotation(direction);
 
-        // Mermiyi oluştur
-        GameObject projectileObj = Instantiate(
-            projectilePrefab,
-            projectileSpawnPoint.position,
-            rotation
-        );
+        // Mermiyi spawn et
+        NetworkObject projectileObj = Instantiate(projectilePrefab, projectileSpawnPoint.position, rotation);
+        projectileObj.Spawn(true);
 
         // Mermi bileşenini al ve başlat
         EnemyProjectile projectile = projectileObj.GetComponent<EnemyProjectile>();
         if (projectile != null)
         {
-            projectile.Initialize(targetPosition, projectileSpeed);
+            projectile.Initialize(projectileSpawnPoint.position, targetPos, projectileSpeed);
         }
         else
         {
             Debug.LogError("Projectile prefab does not have EnemyProjectile component!", this);
-            Destroy(projectileObj);
+            projectileObj.Despawn(true);
         }
-
-       
     }
 } 
