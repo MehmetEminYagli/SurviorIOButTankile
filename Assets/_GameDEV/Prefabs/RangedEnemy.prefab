@@ -109,7 +109,12 @@ MonoBehaviour:
   turnDampening: 0.5
   movementSmoothing: 0.1
   pathEndThreshold: 0.5
-  projectileSpawnPoint: {fileID: 0}
+  projectileSpawnPoint: {fileID: 208714598244549298}
+  turnSpeed: 5
+  lookAtSmoothing: 0.1
+  minAttackInterval: 1
+  maxAttackInterval: 3
+  firstShotDelay: 0.5
 --- !u!114 &5484972046898674005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,7 +129,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   projectilePrefab: {fileID: 6077559154967175824, guid: adbea81dea9a61841ad3dde63720843a, type: 3}
-  projectileSpawnPoint: {fileID: 208714598244549298}
   projectileSpeed: 15
   maxSpreadAngle: 30
   targetHeightOffset: 1

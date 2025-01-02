@@ -1,42 +1,50 @@
 using UnityEngine;
+using Unity.Netcode;
+using System.Collections;
 
 public class RangedEnemy : BaseEnemy
 {
     [Header("Ranged Settings")]
-    [SerializeField] private Transform projectileSpawnPoint; // Mermi çıkış noktası
+    [SerializeField] private Transform projectileSpawnPoint;
+    [SerializeField] private float turnSpeed = 5f;
+    [SerializeField] private float lookAtSmoothing = 0.1f;
+
+    [Header("Attack Settings")]
+    [SerializeField] private float minAttackInterval = 3f;
+    [SerializeField] private float maxAttackInterval = 5f;
+    [SerializeField] private float firstShotDelay = 2f;
+
+    private Quaternion targetRotation;
+    private RangedAttackStrategy rangedStrategy;
+    private Coroutine attackCoroutine;
+    private bool isAttacking = false;
 
     protected override void Awake()
     {
         base.Awake();
 
         // Attack strategy'yi al veya oluştur
-        attackStrategy = GetComponent<RangedAttackStrategy>();
-        if (attackStrategy == null)
+        rangedStrategy = GetComponent<RangedAttackStrategy>();
+        if (rangedStrategy == null)
         {
-            attackStrategy = gameObject.AddComponent<RangedAttackStrategy>();
+            rangedStrategy = gameObject.AddComponent<RangedAttackStrategy>();
             Debug.Log("Added RangedAttackStrategy to " + gameObject.name);
         }
+        attackStrategy = rangedStrategy;
 
         // Projectile spawn point kontrolü
         if (projectileSpawnPoint == null)
         {
-            // Eğer spawn point atanmamışsa, otomatik oluştur
             GameObject spawnPoint = new GameObject("ProjectileSpawnPoint");
             spawnPoint.transform.SetParent(transform);
-            spawnPoint.transform.localPosition = Vector3.forward + Vector3.up; // Düşmanın önünde ve biraz yukarıda
+            spawnPoint.transform.localPosition = Vector3.forward + Vector3.up;
             projectileSpawnPoint = spawnPoint.transform;
-         
         }
 
         // RangedAttackStrategy'ye spawn point'i ata
-        var rangedStrategy = attackStrategy as RangedAttackStrategy;
         if (rangedStrategy != null)
         {
-            var field = typeof(RangedAttackStrategy).GetField("projectileSpawnPoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (field != null)
-            {
-                field.SetValue(rangedStrategy, projectileSpawnPoint);
-            }
+            rangedStrategy.SetProjectileSpawnPoint(projectileSpawnPoint);
         }
 
         // Varsayılan değerleri ayarla
@@ -50,33 +58,115 @@ public class RangedEnemy : BaseEnemy
         {
             agent.stoppingDistance = stoppingDistance;
             agent.speed = moveSpeed;
+            agent.updateRotation = false;
+        }
+    }
+
+    private void Start()
+    {
+        // Atış coroutine'ini başlat
+        StartAttackSequence();
+    }
+
+    private void StartAttackSequence()
+    {
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+        }
+        attackCoroutine = StartCoroutine(AttackSequence());
+    }
+
+    private IEnumerator AttackSequence()
+    {
+        // İlk atış için bekle
+        yield return new WaitForSeconds(firstShotDelay);
+
+        while (true)
+        {
+            if (target != null)
+            {
+                float distanceToTarget = Vector3.Distance(transform.position, target.position);
+                if (distanceToTarget <= attackRange)
+                {
+                    // Hedefe yeterince dönmüş müyüz kontrol et
+                    Vector3 directionToTarget = (target.position - transform.position).normalized;
+                    float angle = Vector3.Angle(transform.forward, directionToTarget);
+                    
+                    // Eğer hedefle aramızdaki açı 30 dereceden azsa ateş et
+                    if (angle < 30f && !isAttacking)
+                    {
+                        isAttacking = true;
+                        Attack();
+                        
+                        // Rastgele bir süre bekle
+                        float waitTime = Random.Range(minAttackInterval, maxAttackInterval);
+                        yield return new WaitForSeconds(waitTime);
+                        isAttacking = false;
+                    }
+                }
+            }
+            // Her frame'de kontrol etmek yerine kısa bir süre bekle
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+    private void Update()
+    {
+        if (target != null)
+        {
+            LookAtTarget();
+        }
+    }
+
+    private void LookAtTarget()
+    {
+        if (target == null) return;
+
+        // Hedef yönünü hesapla
+        Vector3 directionToTarget = (target.position - transform.position).normalized;
+        directionToTarget.y = 0; // Y eksenindeki rotasyonu sıfırla (sadece yatayda dönüş)
+
+        if (directionToTarget != Vector3.zero)
+        {
+            // Hedef rotasyonu hesapla
+            targetRotation = Quaternion.LookRotation(directionToTarget);
+
+            // Yumuşak dönüş uygula
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                Time.deltaTime * turnSpeed
+            );
         }
     }
 
     public override void Attack()
     {
-        if (target == null || Time.time - lastAttackTime < attackCooldown) return;
+        if (target == null) return;
 
-        float distanceToTarget = Vector3.Distance(transform.position, target.position);
-        if (distanceToTarget <= attackRange)
+        lastAttackTime = Time.time;
+        if (rangedStrategy != null)
         {
-           
-            
-            // Hedefe dön
-            Vector3 directionToTarget = (target.position - transform.position).normalized;
-            if (directionToTarget != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation,
-                    targetRotation,
-                    Time.deltaTime * rotationSpeed * turnDampening
-                );
-            }
+            rangedStrategy.Attack(target, accuracy);
+        }
+    }
 
-            // Saldırıyı gerçekleştir
-            attackStrategy.Attack(target, accuracy);
-            lastAttackTime = Time.time;
+    public override void Move()
+    {
+        base.Move();
+        
+        if (target != null)
+        {
+            LookAtTarget();
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
         }
     }
 } 

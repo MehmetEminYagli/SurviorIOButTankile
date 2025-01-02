@@ -5,10 +5,11 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
 {
     [Header("Projectile Settings")]
     [SerializeField] private NetworkObject projectilePrefab;
-    [SerializeField] private Transform projectileSpawnPoint;
     [SerializeField] private float projectileSpeed = 15f;
     [SerializeField] private float maxSpreadAngle = 30f;
     [SerializeField] private float targetHeightOffset = 1f;
+
+    private Transform projectileSpawnPoint;
 
     private void Awake()
     {
@@ -23,9 +24,14 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
         }
     }
 
+    public void SetProjectileSpawnPoint(Transform spawnPoint)
+    {
+        projectileSpawnPoint = spawnPoint;
+    }
+
     public void Attack(Transform target, float accuracy)
     {
-        if (!IsServer)
+        if (!NetworkManager.Singleton.IsServer)
         {
             // Client tarafında attack çağrıldıysa, server'a RPC gönder
             AttackServerRpc(target.position, accuracy);
@@ -43,11 +49,17 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
 
     private void SpawnProjectile(Vector3 targetPosition, float accuracy)
     {
-        if (!IsServer) return;
+        if (!NetworkManager.Singleton.IsServer) return;
 
         if (projectilePrefab == null)
         {
             Debug.LogError("Cannot attack: Projectile Prefab is missing!", this);
+            return;
+        }
+
+        if (projectileSpawnPoint == null)
+        {
+            Debug.LogError("Cannot attack: Projectile Spawn Point is missing!", this);
             return;
         }
 
@@ -69,20 +81,35 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
         Vector3 direction = (targetPos - projectileSpawnPoint.position).normalized;
         Quaternion rotation = Quaternion.LookRotation(direction);
 
-        // Mermiyi spawn et
-        NetworkObject projectileObj = Instantiate(projectilePrefab, projectileSpawnPoint.position, rotation);
-        projectileObj.Spawn(true);
+        try
+        {
+            // Mermiyi spawn et
+            NetworkObject projectileObj = Instantiate(projectilePrefab, projectileSpawnPoint.position, rotation);
+            
+            if (projectileObj != null)
+            {
+                projectileObj.Spawn(true);
 
-        // Mermi bileşenini al ve başlat
-        EnemyProjectile projectile = projectileObj.GetComponent<EnemyProjectile>();
-        if (projectile != null)
-        {
-            projectile.Initialize(projectileSpawnPoint.position, targetPos, projectileSpeed);
+                // Mermi bileşenini al ve başlat
+                EnemyProjectile projectile = projectileObj.GetComponent<EnemyProjectile>();
+                if (projectile != null)
+                {
+                    projectile.Initialize(projectileSpawnPoint.position, targetPos, projectileSpeed);
+                }
+                else
+                {
+                    Debug.LogError("Projectile prefab does not have EnemyProjectile component!", this);
+                    projectileObj.Despawn(true);
+                }
+            }
+            else
+            {
+                Debug.LogError("Failed to instantiate projectile!", this);
+            }
         }
-        else
+        catch (System.Exception e)
         {
-            Debug.LogError("Projectile prefab does not have EnemyProjectile component!", this);
-            projectileObj.Despawn(true);
+            Debug.LogError($"Error spawning projectile: {e.Message}", this);
         }
     }
 } 
