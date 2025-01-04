@@ -679,7 +679,7 @@ GameObject:
   m_Component:
   - component: {fileID: 335001721}
   - component: {fileID: 335001719}
-  - component: {fileID: 335001720}
+  - component: {fileID: 335001722}
   m_Layer: 0
   m_Name: NetworkRoomManager
   m_TagString: Untagged
@@ -712,27 +712,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &335001720
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 335001718}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd4eaccf3e38e9145a87915b4bf69c0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  minPlayersToStart: 2
-  maxPlayers: 4
-  playerPrefab: {fileID: 1342975682272047854, guid: da9c54642133f3542b4c8a30ddab0773, type: 3}
-  spawnPoints:
-  - {fileID: 1050131288}
-  - {fileID: 899034638}
-  - {fileID: 1552206697}
-  - {fileID: 1290763858}
 --- !u!4 &335001721
 Transform:
   m_ObjectHideFlags: 0
@@ -752,6 +731,25 @@ Transform:
   - {fileID: 1290763858}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &335001722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 335001718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d8337b025651f4591a81b09d273c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  playerPrefab: {fileID: 1342975682272047854, guid: da9c54642133f3542b4c8a30ddab0773, type: 3}
+  spawnPoints:
+  - {fileID: 1050131288}
+  - {fileID: 899034638}
+  - {fileID: 1552206697}
+  - {fileID: 1290763858}
 --- !u!1 &494002746
 GameObject:
   m_ObjectHideFlags: 0

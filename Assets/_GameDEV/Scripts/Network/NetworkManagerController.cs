@@ -92,7 +92,7 @@ public class NetworkManagerController : MonoBehaviour
         OnClientDisconnected?.Invoke();
     }
 
-    public void StartHost()
+    public void StartHost() 
     {
         if (networkManager != null)
         {
