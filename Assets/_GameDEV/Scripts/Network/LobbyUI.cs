@@ -30,13 +30,45 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private Button startGameButton;
     [SerializeField] private Button leaveLobbyButton;
 
+    [Header("Material Selection")]
+    [SerializeField] private Button nextMaterialButton;
+    [SerializeField] private Button previousMaterialButton;
+    [SerializeField] private Image materialPreviewImage;
+    
+    private int currentMaterialIndex = 0;
+
     private float refreshTimer = 0f;
     private const float REFRESH_RATE = 1.5f;
+
+    [System.Serializable]
+    private class PlayerListItem
+    {
+        public TextMeshProUGUI nameText;
+        public Image colorImage;
+    }
+
+    private Dictionary<string, PlayerListItem> playerListItems = new Dictionary<string, PlayerListItem>();
 
     private void Start()
     {
         SetupUI();
         ValidateReferences();
+
+        if (nextMaterialButton != null)
+            nextMaterialButton.onClick.AddListener(NextMaterial);
+        
+        if (previousMaterialButton != null)
+            previousMaterialButton.onClick.AddListener(PreviousMaterial);
+            
+        if (materialPreviewImage == null)
+        {
+            Debug.LogError("Material Preview Image is not assigned!");
+        }
+        else
+        {
+            materialPreviewImage.color = Color.white;
+            UpdateMaterialPreview();
+        }
     }
 
     private void ValidateReferences()
@@ -223,18 +255,60 @@ public class LobbyUI : MonoBehaviour
             return;
         }
 
-        // Clear existing player list
-        foreach (Transform child in playerListContent)
-        {
-            Destroy(child.gameObject);
-        }
-
         List<string> players = LobbyManager.Instance.GetPlayersInLobby();
+        Dictionary<string, PlayerListItem> newPlayerListItems = new Dictionary<string, PlayerListItem>();
+
+        // Mevcut oyuncuları güncelle veya yeni ekle
         foreach (string playerName in players)
         {
-            GameObject playerItem = Instantiate(playerListItemPrefab, playerListContent);
-            playerItem.GetComponentInChildren<TextMeshProUGUI>().text = playerName;
+            PlayerListItem item;
+            GameObject playerItem;
+
+            if (playerListItems.ContainsKey(playerName))
+            {
+                // Mevcut oyuncuyu koru
+                item = playerListItems[playerName];
+                playerItem = item.nameText.transform.parent.gameObject;
+            }
+            else
+            {
+                // Yeni oyuncu ekle
+                playerItem = Instantiate(playerListItemPrefab, playerListContent);
+                item = new PlayerListItem
+                {
+                    nameText = playerItem.GetComponentInChildren<TextMeshProUGUI>(),
+                    colorImage = playerItem.GetComponentInChildren<Image>()
+                };
+            }
+
+            if (item.nameText != null)
+            {
+                item.nameText.text = playerName;
+            }
+
+            if (item.colorImage != null)
+            {
+                int playerMaterialIndex = LobbyManager.Instance.GetPlayerMaterialIndex(playerName);
+                Color playerColor = LobbyManager.Instance.GetPreviewColorByIndex(playerMaterialIndex);
+                item.colorImage.color = new Color(playerColor.r, playerColor.g, playerColor.b, 1f);
+            }
+
+            newPlayerListItems[playerName] = item;
         }
+
+        // Eski oyuncuları temizle
+        foreach (var kvp in playerListItems)
+        {
+            if (!newPlayerListItems.ContainsKey(kvp.Key))
+            {
+                if (kvp.Value.nameText != null)
+                {
+                    Destroy(kvp.Value.nameText.transform.parent.gameObject);
+                }
+            }
+        }
+
+        playerListItems = newPlayerListItems;
     }
 
     private void UpdateLobbyRoomUI(string lobbyName, string lobbyCode)
@@ -278,6 +352,56 @@ public class LobbyUI : MonoBehaviour
         }
     }
 
+    private void NextMaterial()
+    {
+        currentMaterialIndex = (currentMaterialIndex + 1) % LobbyManager.Instance.GetMaterialCount();
+        UpdateMaterialSelection();
+    }
+
+    private void PreviousMaterial()
+    {
+        currentMaterialIndex--;
+        if (currentMaterialIndex < 0)
+            currentMaterialIndex = LobbyManager.Instance.GetMaterialCount() - 1;
+        UpdateMaterialSelection();
+    }
+
+    private void UpdateMaterialSelection()
+    {
+        if (LobbyManager.Instance != null)
+        {
+            LobbyManager.Instance.SelectMaterial(currentMaterialIndex);
+            UpdateMaterialPreview();
+            
+            // Hemen local oyuncunun rengini güncelle
+            UpdateLocalPlayerColor();
+        }
+    }
+
+    private void UpdateLocalPlayerColor()
+    {
+        string localPlayerName = LobbyManager.Instance.GetPlayerName();
+        if (playerListItems.ContainsKey(localPlayerName))
+        {
+            PlayerListItem item = playerListItems[localPlayerName];
+            if (item.colorImage != null)
+            {
+                Color newColor = LobbyManager.Instance.GetPreviewColorByIndex(currentMaterialIndex);
+                item.colorImage.color = new Color(newColor.r, newColor.g, newColor.b, 1f);
+            }
+        }
+    }
+
+    private void UpdateMaterialPreview()
+    {
+        if (materialPreviewImage != null && LobbyManager.Instance != null)
+        {
+            Color previewColor = LobbyManager.Instance.GetPreviewColorByIndex(currentMaterialIndex);
+            Debug.Log($"Updating material preview color to: {previewColor}");
+            materialPreviewImage.color = new Color(previewColor.r, previewColor.g, previewColor.b, 1f);
+        }
+    }
+
     private void OnDestroy()
     {
         if (confirmNicknameButton != null)
@@ -297,5 +421,11 @@ public class LobbyUI : MonoBehaviour
         
         if (leaveLobbyButton != null)
             leaveLobbyButton.onClick.RemoveAllListeners();
+        
+        if (nextMaterialButton != null)
+            nextMaterialButton.onClick.RemoveListener(NextMaterial);
+        
+        if (previousMaterialButton != null)
+            previousMaterialButton.onClick.RemoveListener(PreviousMaterial);
     }
 } 

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: PlayerMaterials
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMaterialsData
+  availableMaterials:
+  - materialName: Blue
+    material: {fileID: 2100000, guid: 8ed76877945651549b6d6a7984040302, type: 2}
+    previewColor: {r: 0, g: 0.08825779, b: 1, a: 0}
+  - materialName: Green
+    material: {fileID: 2100000, guid: 0df9621422a5fe04f98abef5ca7bfe63, type: 2}
+    previewColor: {r: 0.23910117, g: 1, b: 0, a: 0}
+  - materialName: Red
+    material: {fileID: 2100000, guid: d389dc702a8ba324ab681a45a9fc5890, type: 2}
+    previewColor: {r: 1, g: 0, b: 0, a: 0}
+  - materialName: Yellow
+    material: {fileID: 2100000, guid: 1db751d98ad19ea469e3211f966b078a, type: 2}
+    previewColor: {r: 1, g: 0.9723208, b: 0, a: 0}
+  - materialName: Black
+    material: {fileID: 2100000, guid: 23209a80bce89814ab837860d16572d4, type: 2}
+    previewColor: {r: 0, g: 0, b: 0, a: 0}

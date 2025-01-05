@@ -23,6 +23,10 @@ public class NetworkPlayer : NetworkBehaviour
     private CinemachineVirtualCamera playerCamera;
     private Rigidbody rb;
 
+    [SerializeField] private MaterialManager materialManager;
+    
+    private NetworkVariable<int> selectedMaterialIndex = new NetworkVariable<int>();
+
     private void Awake()
     {
         playerMovement = GetComponent<PlayerMovement>();
@@ -34,6 +38,19 @@ public class NetworkPlayer : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
+        
+        if (IsOwner)
+        {
+            SetMaterialServerRpc(LobbyManager.Instance.GetLocalPlayerMaterialIndex());
+        }
+        
+        selectedMaterialIndex.OnValueChanged += OnMaterialIndexChanged;
+        if (materialManager != null)
+        {
+            materialManager.ApplyMaterialByIndex(selectedMaterialIndex.Value);
+        }
+
         if (IsOwner)
         {
             // Local player setup
@@ -174,6 +191,9 @@ public class NetworkPlayer : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
+        base.OnNetworkDespawn();
+        selectedMaterialIndex.OnValueChanged -= OnMaterialIndexChanged;
+
         if (IsOwner)
         {
             CancelInvoke(nameof(SyncTransform));
@@ -184,5 +204,19 @@ public class NetworkPlayer : NetworkBehaviour
                 Destroy(playerCamera.gameObject);
             }
         }
+    }
+
+    private void OnMaterialIndexChanged(int previousValue, int newValue)
+    {
+        if (materialManager != null)
+        {
+            materialManager.ApplyMaterialByIndex(newValue);
+        }
+    }
+
+    [ServerRpc]
+    private void SetMaterialServerRpc(int materialIndex)
+    {
+        selectedMaterialIndex.Value = materialIndex;
     }
 } 

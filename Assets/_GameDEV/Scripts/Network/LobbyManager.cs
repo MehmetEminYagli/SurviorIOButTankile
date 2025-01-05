@@ -25,6 +25,11 @@ public class LobbyManager : MonoBehaviour
     private const float LOBBY_UPDATE_INTERVAL = 1.5f;
     private string playerName = "Player";
     
+    [SerializeField] private PlayerMaterialsData playerMaterials;
+    
+    private Dictionary<string, int> playerMaterialSelections = new Dictionary<string, int>();
+    private int localPlayerMaterialIndex = 0;
+
     private void Awake()
     {
         if (Instance == null)
@@ -248,7 +253,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    private void HandleLobbyPollForUpdates()
+    private async void HandleLobbyPollForUpdates()
     {
         if (currentLobby != null)
         {
@@ -257,16 +262,31 @@ public class LobbyManager : MonoBehaviour
             {
                 float lobbyUpdateTimerMax = LOBBY_UPDATE_INTERVAL;
                 lobbyUpdateTimer = lobbyUpdateTimerMax;
-                UpdateLobby();
+                await UpdateLobby();
             }
         }
     }
 
-    private async void UpdateLobby()
+    private async Task UpdateLobby()
     {
         try
         {
             currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
+            
+            // Lobby güncellendiğinde materyal seçimlerini güncelle
+            foreach (var player in currentLobby.Players)
+            {
+                if (player.Data != null && 
+                    player.Data.ContainsKey("Nickname") && 
+                    player.Data.ContainsKey("MaterialIndex"))
+                {
+                    string playerNickname = player.Data["Nickname"].Value;
+                    if (int.TryParse(player.Data["MaterialIndex"].Value, out int materialIndex))
+                    {
+                        playerMaterialSelections[playerNickname] = materialIndex;
+                    }
+                }
+            }
         }
         catch (Exception e)
         {
@@ -386,5 +406,103 @@ public class LobbyManager : MonoBehaviour
     public int GetCurrentLobbyPlayerCount()
     {
         return currentLobby?.Players.Count ?? 0;
+    }
+
+    public async void SelectMaterial(int materialIndex)
+    {
+        if (materialIndex >= 0 && materialIndex < playerMaterials.availableMaterials.Count)
+        {
+            localPlayerMaterialIndex = materialIndex;
+            
+            // Hemen local dictionary'yi güncelle
+            if (!string.IsNullOrEmpty(playerName))
+            {
+                playerMaterialSelections[playerName] = materialIndex;
+            }
+
+            // Update player data in lobby
+            if (currentLobby != null)
+            {
+                await UpdatePlayerMaterialData(materialIndex);
+            }
+        }
+    }
+
+    private async Task UpdatePlayerMaterialData(int materialIndex)
+    {
+        try
+        {
+            var playerData = new Dictionary<string, PlayerDataObject>
+            {
+                { "Nickname", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, playerName) },
+                { "MaterialIndex", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, materialIndex.ToString()) }
+            };
+
+            await LobbyService.Instance.UpdatePlayerAsync(currentLobby.Id, AuthenticationService.Instance.PlayerId, new UpdatePlayerOptions
+            {
+                Data = playerData
+            });
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to update player material data: {e.Message}");
+        }
+    }
+
+    public int GetPlayerMaterialIndex(string playerName)
+    {
+        // Önce local dictionary'den kontrol et
+        if (playerMaterialSelections.ContainsKey(playerName))
+        {
+            return playerMaterialSelections[playerName];
+        }
+
+        // Eğer local'de yoksa lobby'den kontrol et
+        if (currentLobby != null)
+        {
+            foreach (var player in currentLobby.Players)
+            {
+                if (player.Data != null && 
+                    player.Data.ContainsKey("Nickname") && 
+                    player.Data["Nickname"].Value == playerName &&
+                    player.Data.ContainsKey("MaterialIndex"))
+                {
+                    if (int.TryParse(player.Data["MaterialIndex"].Value, out int materialIndex))
+                    {
+                        playerMaterialSelections[playerName] = materialIndex; // Cache the result
+                        return materialIndex;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    public int GetLocalPlayerMaterialIndex()
+    {
+        return localPlayerMaterialIndex;
+    }
+
+    public Material GetMaterialByIndex(int index)
+    {
+        if (index >= 0 && index < playerMaterials.availableMaterials.Count)
+        {
+            return playerMaterials.availableMaterials[index].material;
+        }
+        return null;
+    }
+
+    public Color GetPreviewColorByIndex(int index)
+    {
+        if (index >= 0 && index < playerMaterials.availableMaterials.Count)
+        {
+            return playerMaterials.availableMaterials[index].previewColor;
+        }
+        return Color.white;
+    }
+
+    public int GetMaterialCount()
+    {
+        return playerMaterials != null ? playerMaterials.availableMaterials.Count : 0;
     }
 } 
