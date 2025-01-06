@@ -65,7 +65,10 @@ public class ObjectPool : NetworkBehaviour
     {
         NetworkObject obj = Instantiate(prefab);
         obj.gameObject.SetActive(false);
-        obj.transform.SetParent(transform);
+        if (obj.IsSpawned)
+        {
+            obj.transform.SetParent(transform);
+        }
         return obj;
     }
 
@@ -161,5 +164,10 @@ public class ObjectPool : NetworkBehaviour
             }
             poolDictionary.Add(tag, objectPool);
         }
+    }
+
+    public bool HasPool(string tag)
+    {
+        return poolDictionary != null && poolDictionary.ContainsKey(tag);
     }
 } 

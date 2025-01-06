@@ -39,9 +39,13 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
 
     private void InitializeProjectilePool()
     {
-        if (ObjectPool.Instance != null && projectilePrefab != null)
+        if (ObjectPool.Instance != null && projectilePrefab != null && !isPoolInitialized)
         {
-            ObjectPool.Instance.RegisterPrefab(PROJECTILE_POOL_TAG, projectilePrefab, initialPoolSize);
+            // Check if the pool already exists in the ObjectPool's dictionary
+            if (!ObjectPool.Instance.HasPool(PROJECTILE_POOL_TAG))
+            {
+                ObjectPool.Instance.RegisterPrefab(PROJECTILE_POOL_TAG, projectilePrefab, initialPoolSize);
+            }
             isPoolInitialized = true;
         }
     }

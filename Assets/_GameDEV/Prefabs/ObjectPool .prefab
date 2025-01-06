@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 519402059
+  GlobalObjectIdHash: 3521228514
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -75,7 +75,7 @@ MonoBehaviour:
   - tag: Projectile
     prefab: {fileID: 688228698229397355, guid: ba2c5f19fecade44c82168c74b8340e7, type: 3}
     size: 25
-  - tag: Projectile
+  - tag: EnemyProjectile
     prefab: {fileID: 6077559154967175824, guid: adbea81dea9a61841ad3dde63720843a, type: 3}
     size: 25
   - tag: RangedEnemy
