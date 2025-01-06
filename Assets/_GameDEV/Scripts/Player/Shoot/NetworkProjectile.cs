@@ -7,6 +7,7 @@ public class NetworkProjectile : NetworkBehaviour
 {
     [SerializeField] private float lifeTime = 3f;
     [SerializeField] private float damage = 25f;
+    [SerializeField] private GameObject hitEffectPrefab;
 
     private NetworkVariable<Vector3> networkVelocity = new NetworkVariable<Vector3>();
     private Rigidbody rb;
@@ -58,6 +59,10 @@ public class NetworkProjectile : NetworkBehaviour
 
         Debug.Log($"[Projectile] Çarpışma tespit edildi: {collision.gameObject.name}");
 
+        // Çarpışma noktasında efekt oluştur
+        Vector3 hitPoint = collision.contacts[0].point;
+        SpawnHitEffectClientRpc(hitPoint);
+
         // Prevent friendly fire
         if (collision.gameObject.CompareTag("Player"))
         {
@@ -81,6 +86,16 @@ public class NetworkProjectile : NetworkBehaviour
         {
             Debug.Log("[Projectile] Hedef düşman değil, mermi yok ediliyor");
             DespawnProjectile();
+        }
+    }
+
+    [ClientRpc]
+    private void SpawnHitEffectClientRpc(Vector3 hitPoint)
+    {
+        if (hitEffectPrefab != null)
+        {
+            GameObject effect = Instantiate(hitEffectPrefab, hitPoint, Quaternion.identity);
+            Destroy(effect, 2f); // 2 saniye sonra efekti yok et
         }
     }
 
