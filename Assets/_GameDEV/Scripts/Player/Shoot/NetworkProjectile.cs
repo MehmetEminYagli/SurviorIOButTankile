@@ -6,7 +6,7 @@ using Unity.Netcode;
 public class NetworkProjectile : NetworkBehaviour
 {
     [SerializeField] private float lifeTime = 3f;
-    [SerializeField] private float damage = 10f;
+    [SerializeField] private float damage = 25f;
 
     private NetworkVariable<Vector3> networkVelocity = new NetworkVariable<Vector3>();
     private Rigidbody rb;
@@ -32,7 +32,6 @@ public class NetworkProjectile : NetworkBehaviour
     {
         if (IsServer)
         {
-            // Sadece belirgin velocity değişimlerinde güncelle
             if (Vector3.Distance(networkVelocity.Value, rb.linearVelocity) > 0.1f)
             {
                 networkVelocity.Value = rb.linearVelocity;
@@ -57,26 +56,30 @@ public class NetworkProjectile : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        // Dost ateşini önle
+        Debug.Log($"[Projectile] Çarpışma tespit edildi: {collision.gameObject.name}");
+
+        // Prevent friendly fire
         if (collision.gameObject.CompareTag("Player"))
         {
             NetworkObject networkObject = collision.gameObject.GetComponent<NetworkObject>();
             if (networkObject != null && networkObject.OwnerClientId == shooterClientId)
             {
+                Debug.Log("[Projectile] Dost ateşi engellendi");
                 return;
             }
         }
 
-        // Hasar verme işlemi
-        IHealth health = collision.gameObject.GetComponent<IHealth>();
-        if (health != null)
+        // Handle damage
+        BaseEnemy enemy = collision.gameObject.GetComponent<BaseEnemy>();
+        if (enemy != null)
         {
-            health.TakeDamage(damage);
+            Debug.Log($"[Projectile] Düşmana hasar veriliyor - Hasar: {damage}");
+            enemy.TakeDamage(damage);
             DespawnProjectile();
         }
         else if (!collision.gameObject.CompareTag("Projectile"))
         {
-            // Sadece hasar verilemeyen ve mermi olmayan nesnelerde yok ol
+            Debug.Log("[Projectile] Hedef düşman değil, mermi yok ediliyor");
             DespawnProjectile();
         }
     }

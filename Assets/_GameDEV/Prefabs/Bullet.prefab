@@ -102,7 +102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   lifeTime: 3
-  damage: 10
+  damage: 25
 --- !u!65 &5037826076986259595
 BoxCollider:
   m_ObjectHideFlags: 0

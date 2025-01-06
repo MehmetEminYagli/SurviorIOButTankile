@@ -28,15 +28,19 @@ public class HealthComponent : MonoBehaviour, IHealth
 
     public void TakeDamage(float damage)
     {
-        if (isDead) return;
+        if (currentHealth <= 0) return;
 
-        damage = Mathf.Max(0, damage); // Ensure damage is not negative
+        Debug.Log($"[HealthComponent] Hasar alındı - Hasar: {damage}, Önceki Can: {currentHealth}");
+        
         currentHealth = Mathf.Max(0, currentHealth - damage);
-
+        
+        // Event'leri tetikle
         onHealthChanged?.Invoke(currentHealth);
         onDamageTaken?.Invoke(damage);
 
-        if (currentHealth <= 0 && !isDead)
+        Debug.Log($"[HealthComponent] Yeni can durumu: {currentHealth}");
+
+        if (currentHealth <= 0)
         {
             Die();
         }
@@ -59,10 +63,7 @@ public class HealthComponent : MonoBehaviour, IHealth
 
     public void Die()
     {
-        if (isDead) return;
-
-        isDead = true;
-        currentHealth = 0;
+        Debug.Log("[HealthComponent] Ölüm gerçekleşti");
         onDeath?.Invoke();
 
         if (destroyOnDeath)
