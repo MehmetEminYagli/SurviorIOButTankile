@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Linq;
 
 public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
 {
@@ -8,8 +9,11 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
     [SerializeField] private float projectileSpeed = 15f;
     [SerializeField] private float maxSpreadAngle = 30f;
     [SerializeField] private float targetHeightOffset = 1f;
+    [SerializeField] private int initialPoolSize = 30;
 
     private Transform projectileSpawnPoint;
+    private const string PROJECTILE_POOL_TAG = "EnemyProjectile";
+    private bool isPoolInitialized = false;
 
     private void Awake()
     {
@@ -24,6 +28,24 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
         }
     }
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (IsServer && !isPoolInitialized)
+        {
+            InitializeProjectilePool();
+        }
+    }
+
+    private void InitializeProjectilePool()
+    {
+        if (ObjectPool.Instance != null && projectilePrefab != null)
+        {
+            ObjectPool.Instance.RegisterPrefab(PROJECTILE_POOL_TAG, projectilePrefab, initialPoolSize);
+            isPoolInitialized = true;
+        }
+    }
+
     public void SetProjectileSpawnPoint(Transform spawnPoint)
     {
         projectileSpawnPoint = spawnPoint;
@@ -33,7 +55,6 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
     {
         if (!NetworkManager.Singleton.IsServer)
         {
-            // Client tarafında attack çağrıldıysa, server'a RPC gönder
             AttackServerRpc(target.position, accuracy);
             return;
         }
@@ -83,14 +104,30 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
 
         try
         {
-            // Mermiyi spawn et
-            NetworkObject projectileObj = Instantiate(projectilePrefab, projectileSpawnPoint.position, rotation);
-            
+            // Object pool'dan mermi al ve NetworkObjectId'sini kaydet
+            ulong lastSpawnedId = 0;
+            ObjectPool.Instance.SpawnFromPoolServerRpc(
+                PROJECTILE_POOL_TAG,
+                projectileSpawnPoint.position,
+                rotation,
+                new ServerRpcParams
+                {
+                    Receive = new ServerRpcReceiveParams
+                    {
+                        SenderClientId = NetworkManager.Singleton.LocalClientId
+                    }
+                }
+            );
+
+            // Son spawn edilen objeyi bul
+            var spawnedObjects = NetworkManager.Singleton.SpawnManager.SpawnedObjects;
+            NetworkObject projectileObj = spawnedObjects.Values
+                .Where(obj => obj.GetComponent<EnemyProjectile>() != null)
+                .OrderBy(obj => obj.NetworkObjectId)
+                .LastOrDefault();
+
             if (projectileObj != null)
             {
-                projectileObj.Spawn(true);
-
-                // Mermi bileşenini al ve başlat
                 EnemyProjectile projectile = projectileObj.GetComponent<EnemyProjectile>();
                 if (projectile != null)
                 {
@@ -99,12 +136,12 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
                 else
                 {
                     Debug.LogError("Projectile prefab does not have EnemyProjectile component!", this);
-                    projectileObj.Despawn(true);
+                    ObjectPool.Instance.ReturnToPoolServerRpc(projectileObj);
                 }
             }
             else
             {
-                Debug.LogError("Failed to instantiate projectile!", this);
+                Debug.LogError("Failed to find spawned projectile!", this);
             }
         }
         catch (System.Exception e)

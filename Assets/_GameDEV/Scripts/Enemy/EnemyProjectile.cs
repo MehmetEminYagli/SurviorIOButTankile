@@ -2,124 +2,102 @@ using UnityEngine;
 using Unity.Netcode;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(NetworkObject))]
 public class EnemyProjectile : NetworkBehaviour
 {
     [Header("Projectile Settings")]
     [SerializeField] private float damage = 10f;
-    [SerializeField] private float lifeTime = 5f;
-    [SerializeField] private float arcHeight = 2f;
-    [SerializeField] private bool rotateTowardsVelocity = true;
-    [SerializeField] private float rotationSpeed = 15f;
-
-    private NetworkVariable<Vector3> networkStartPosition = new NetworkVariable<Vector3>();
-    private NetworkVariable<Vector3> networkTargetPosition = new NetworkVariable<Vector3>();
-    private NetworkVariable<float> networkProjectileSpeed = new NetworkVariable<float>();
-    private NetworkVariable<bool> networkIsInitialized = new NetworkVariable<bool>();
-
-    private float totalTime;
-    private float elapsedTime;
+    [SerializeField] private float maxLifetime = 5f;
+    [SerializeField] private float collisionCheckRadius = 0.1f;
+    [SerializeField] private LayerMask collisionMask;
+    
     private Rigidbody rb;
+    private Vector3 targetPosition;
+    private float projectileSpeed;
+    private float currentLifetime;
+    private bool isInitialized = false;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        rb.useGravity = false;
-        rb.isKinematic = true;
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        if (rb != null)
+        {
+            rb.useGravity = false;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        }
     }
 
     public override void OnNetworkSpawn()
     {
-        if (IsServer)
-        {
-            Destroy(gameObject, lifeTime);
-        }
-
-        networkIsInitialized.OnValueChanged += OnInitializedChanged;
+        base.OnNetworkSpawn();
+        currentLifetime = 0f;
     }
 
-    public override void OnNetworkDespawn()
-    {
-        networkIsInitialized.OnValueChanged -= OnInitializedChanged;
-    }
-
-    private void OnInitializedChanged(bool previousValue, bool newValue)
-    {
-        if (newValue)
-        {
-            totalTime = Vector3.Distance(networkStartPosition.Value, networkTargetPosition.Value) / networkProjectileSpeed.Value;
-            elapsedTime = 0f;
-        }
-    }
-
-    public void Initialize(Vector3 start, Vector3 target, float speed)
+    public void Initialize(Vector3 startPosition, Vector3 targetPos, float speed)
     {
         if (!IsServer) return;
 
-        networkStartPosition.Value = start;
-        networkTargetPosition.Value = target;
-        networkProjectileSpeed.Value = speed;
-        networkIsInitialized.Value = true;
+        transform.position = startPosition;
+        targetPosition = targetPos;
+        projectileSpeed = speed;
+        currentLifetime = 0f;
+        isInitialized = true;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            Vector3 direction = (targetPosition - startPosition).normalized;
+            rb.linearVelocity = direction * projectileSpeed;
+        }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (!networkIsInitialized.Value) return;
+        if (!IsServer || !isInitialized) return;
 
-        elapsedTime += Time.deltaTime;
-        float normalizedTime = elapsedTime / totalTime;
-
-        if (normalizedTime >= 1f)
+        currentLifetime += Time.fixedDeltaTime;
+        if (currentLifetime >= maxLifetime)
         {
-            if (IsServer)
-            {
-                NetworkObject.Despawn(true);
-            }
+            ReturnToPool();
             return;
         }
 
-        Vector3 currentPosition = Vector3.Lerp(networkStartPosition.Value, networkTargetPosition.Value, normalizedTime);
-        float height = Mathf.Sin(normalizedTime * Mathf.PI) * arcHeight;
-        currentPosition.y += height;
-
-        transform.position = currentPosition;
-
-        if (rotateTowardsVelocity)
+        // Çarpışma kontrolü
+        Collider[] hits = Physics.OverlapSphere(transform.position, collisionCheckRadius, collisionMask);
+        foreach (Collider hit in hits)
         {
-            Vector3 moveDirection;
-            if (normalizedTime < 1f)
+            if (hit.TryGetComponent<IHealth>(out var health))
             {
-                Vector3 nextPosition = Vector3.Lerp(networkStartPosition.Value, networkTargetPosition.Value, Mathf.Min(1f, normalizedTime + 0.1f));
-                nextPosition.y += Mathf.Sin((normalizedTime + 0.1f) * Mathf.PI) * arcHeight;
-                moveDirection = (nextPosition - transform.position).normalized;
+                health.TakeDamage(damage);
+                ReturnToPool();
+                return;
             }
-            else
+            else if (hit.gameObject.layer != gameObject.layer) // Kendi layer'ımız hariç herhangi bir şeye çarpma
             {
-                moveDirection = (networkTargetPosition.Value - transform.position).normalized;
-            }
-
-            if (moveDirection != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                ReturnToPool();
+                return;
             }
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void ReturnToPool()
     {
         if (!IsServer) return;
 
-        IHealth health = other.GetComponent<IHealth>();
-        if (health != null)
+        isInitialized = false;
+        if (rb != null)
         {
-            health.TakeDamage(damage);
-            NetworkObject.Despawn(true);
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
         }
-        else if (!other.CompareTag("Enemy") && !other.CompareTag("Projectile"))
-        {
-            NetworkObject.Despawn(true);
-        }
+
+        ObjectPool.Instance.ReturnToPoolServerRpc(new NetworkObjectReference(NetworkObject));
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, collisionCheckRadius);
     }
 } 

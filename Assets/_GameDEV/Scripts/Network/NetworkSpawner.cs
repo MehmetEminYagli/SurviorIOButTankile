@@ -10,6 +10,9 @@ public class NetworkSpawner : NetworkBehaviour
     private List<Transform> availableSpawnPoints;
     private HashSet<ulong> spawnedPlayers = new HashSet<ulong>();
 
+    [Header("Object Pooling")]
+    [SerializeField] private ObjectPool objectPoolPrefab;
+
     private void Start()
     {
         if (IsServer)
@@ -100,5 +103,20 @@ public class NetworkSpawner : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnected;
         }
         base.OnDestroy();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        
+        if (IsServer)
+        {
+            // Object Pool'u oluştur
+            if (objectPoolPrefab != null)
+            {
+                NetworkObject poolObj = Instantiate(objectPoolPrefab).GetComponent<NetworkObject>();
+                poolObj.Spawn();
+            }
+        }
     }
 } 

@@ -750,6 +750,7 @@ MonoBehaviour:
   - {fileID: 899034638}
   - {fileID: 1552206697}
   - {fileID: 1290763858}
+  objectPoolPrefab: {fileID: 3310582418140976474, guid: dd01ba2a3c95ba74b84023d12a93da78, type: 3}
 --- !u!1 &494002746
 GameObject:
   m_ObjectHideFlags: 0

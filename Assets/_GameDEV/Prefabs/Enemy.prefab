@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7216832789644773533}
   - component: {fileID: 6275450251463010796}
   - component: {fileID: 2208793078844700389}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -166,6 +166,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 113486278945345179}
     m_Modifications:
+    - target: {fileID: 78529208113448208, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1039822125275947828, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1957038109427425784, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 2498291674261773449, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -206,9 +218,33 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2891408613835666263, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 3017525713386341939, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
       propertyPath: m_Name
       value: Enemy_Tank_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3017525713386341939, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736230157508434243, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7738349727356247920, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8611642550034196437, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8845191648927733752, guid: b05b2d632322e814fa6569c4fdae32ba, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
