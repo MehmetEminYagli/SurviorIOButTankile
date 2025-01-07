@@ -28,3 +28,6 @@ MonoBehaviour:
   - materialName: Cyan
     material: {fileID: 2100000, guid: 13521c99a13c0254c8c99f841e31f5e4, type: 2}
     previewColor: {r: 0, g: 1, b: 0.972549, a: 0}
+  - materialName: pruple
+    material: {fileID: 2100000, guid: 4699e7e5acdcdbc4b981ecdd67eb300f, type: 2}
+    previewColor: {r: 0.7024509, g: 0, b: 0.735849, a: 0}
