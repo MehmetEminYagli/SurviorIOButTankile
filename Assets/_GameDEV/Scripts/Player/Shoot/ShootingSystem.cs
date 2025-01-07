@@ -20,20 +20,43 @@ public class ShootingSystem : NetworkBehaviour, IShooter
 
         if (IsServer)
         {
-            SpawnProjectile(direction, spawnPosition);
+            HandleShoot(direction, spawnPosition);
         }
         else if (IsClient)
         {
-            SpawnProjectileServerRpc(direction, spawnPosition);
+            ShootServerRpc(direction, spawnPosition);
         }
 
+        // Local efektler için
+        PlayShootEffectsLocally(direction, spawnPosition);
         lastShootTime = Time.time;
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void SpawnProjectileServerRpc(Vector3 direction, Vector3 spawnPosition)
+    private void PlayShootEffectsLocally(Vector3 direction, Vector3 spawnPosition)
     {
+        // Burada lokal efektler eklenebilir (ses, partikül vb.)
+        // Bu metod hem client hem de server tarafında çalışır
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ShootServerRpc(Vector3 direction, Vector3 spawnPosition)
+    {
+        HandleShoot(direction, spawnPosition);
+    }
+
+    private void HandleShoot(Vector3 direction, Vector3 spawnPosition)
+    {
+        if (!IsServer) return;
+
         SpawnProjectile(direction, spawnPosition);
+        ShootClientRpc(direction, spawnPosition);
+    }
+
+    [ClientRpc]
+    private void ShootClientRpc(Vector3 direction, Vector3 spawnPosition)
+    {
+        if (IsServer) return; // Server zaten efektleri oynatmış olacak
+        PlayShootEffectsLocally(direction, spawnPosition);
     }
 
     private void SpawnProjectile(Vector3 direction, Vector3 spawnPosition)
