@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMaterialsData
   availableMaterials:
   - materialName: Blue
-    material: {fileID: 2100000, guid: 34e4965050836254b88c5e9daf3324e8, type: 2}
+    material: {fileID: 2100000, guid: 8ed76877945651549b6d6a7984040302, type: 2}
     previewColor: {r: 0, g: 0.08825779, b: 1, a: 0}
   - materialName: Green
-    material: {fileID: 2100000, guid: d7baf9a0efddd8749944963f86a10ec5, type: 2}
+    material: {fileID: 2100000, guid: 0df9621422a5fe04f98abef5ca7bfe63, type: 2}
     previewColor: {r: 0.23910117, g: 1, b: 0, a: 0}
   - materialName: Red
-    material: {fileID: 2100000, guid: 72e2a805aa96c0c4b9b54d2746e30515, type: 2}
+    material: {fileID: 2100000, guid: d389dc702a8ba324ab681a45a9fc5890, type: 2}
     previewColor: {r: 1, g: 0, b: 0, a: 0}
   - materialName: Yellow
-    material: {fileID: 2100000, guid: 0d1e1ffce2b737140a3bfd6ffacd8435, type: 2}
+    material: {fileID: 2100000, guid: 1db751d98ad19ea469e3211f966b078a, type: 2}
     previewColor: {r: 1, g: 0.9723208, b: 0, a: 0}
-  - materialName: Cyan
-    material: {fileID: 2100000, guid: 13521c99a13c0254c8c99f841e31f5e4, type: 2}
-    previewColor: {r: 0, g: 1, b: 0.972549, a: 0}
+  - materialName: Black
+    material: {fileID: 2100000, guid: 23209a80bce89814ab837860d16572d4, type: 2}
+    previewColor: {r: 0, g: 0, b: 0, a: 0}
