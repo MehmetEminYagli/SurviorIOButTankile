@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.Events;
+using Unity.Netcode;
 
-public class HealthComponent : MonoBehaviour, IHealth
+public class HealthComponent : NetworkBehaviour, IHealth
 {
     [Header("Health Settings")]
     [SerializeField] private float maxHealth = 100f;
@@ -14,19 +15,19 @@ public class HealthComponent : MonoBehaviour, IHealth
     public UnityEvent<float> onHealed;
     public UnityEvent onDeath;
 
-    private float currentHealth;
-    private bool isDead;
+    protected float currentHealth;
+    protected bool isDead;
 
     public float CurrentHealth => currentHealth;
     public float MaxHealth => maxHealth;
     public bool IsDead => isDead;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage)
     {
         if (currentHealth <= 0) return;
 
@@ -46,7 +47,7 @@ public class HealthComponent : MonoBehaviour, IHealth
         }
     }
 
-    public void Heal(float amount)
+    public virtual void Heal(float amount)
     {
         if (isDead) return;
 
@@ -61,9 +62,12 @@ public class HealthComponent : MonoBehaviour, IHealth
         }
     }
 
-    public void Die()
+    public virtual void Die()
     {
+        if (isDead) return;
+        
         Debug.Log("[HealthComponent] Ölüm gerçekleşti");
+        isDead = true;
         onDeath?.Invoke();
 
         if (destroyOnDeath)
@@ -73,7 +77,7 @@ public class HealthComponent : MonoBehaviour, IHealth
     }
 
     // Helper method to reset health
-    public void ResetHealth()
+    public virtual void ResetHealth()
     {
         isDead = false;
         currentHealth = maxHealth;

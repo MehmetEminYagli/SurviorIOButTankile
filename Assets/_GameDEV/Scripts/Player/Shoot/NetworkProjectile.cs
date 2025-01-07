@@ -12,12 +12,23 @@ public class NetworkProjectile : NetworkBehaviour
     private NetworkVariable<Vector3> networkVelocity = new NetworkVariable<Vector3>();
     private Rigidbody rb;
     private ulong shooterClientId;
+    private bool isQuitting = false;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+    }
+
+    private void OnEnable()
+    {
+        isQuitting = false;
+    }
+
+    private void OnApplicationQuit()
+    {
+        isQuitting = true;
     }
 
     public override void OnNetworkSpawn()
@@ -55,7 +66,7 @@ public class NetworkProjectile : NetworkBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (!IsServer) return;
+        if (!IsServer || collision == null || collision.gameObject == null || isQuitting) return;
 
         Debug.Log($"[Projectile] Çarpışma tespit edildi: {collision.gameObject.name}");
 
@@ -75,16 +86,37 @@ public class NetworkProjectile : NetworkBehaviour
         }
 
         // Handle damage
+        NetworkHealthComponent healthComponent = collision.gameObject.GetComponent<NetworkHealthComponent>();
+        if (healthComponent != null)
+        {
+            Debug.Log($"[Projectile] Hedefe hasar veriliyor - Hasar: {damage}");
+            healthComponent.TakeDamage(damage);
+            DespawnProjectile();
+            return;
+        }
+
         BaseEnemy enemy = collision.gameObject.GetComponent<BaseEnemy>();
         if (enemy != null)
         {
             Debug.Log($"[Projectile] Düşmana hasar veriliyor - Hasar: {damage}");
             enemy.TakeDamage(damage);
             DespawnProjectile();
+            return;
         }
-        else if (!collision.gameObject.CompareTag("Projectile"))
+
+        // Eğer çarpılan obje mermi değilse mermiyi yok et
+        try
         {
-            Debug.Log("[Projectile] Hedef düşman değil, mermi yok ediliyor");
+            if (!collision.gameObject.CompareTag("Projectile"))
+            {
+                Debug.Log("[Projectile] Hedef mermi değil, mermi yok ediliyor");
+                DespawnProjectile();
+            }
+        }
+        catch (UnityEngine.UnityException)
+        {
+            // Tag bulunamadıysa mermiyi yok et
+            Debug.Log("[Projectile] Tag kontrolünde hata, mermi yok ediliyor");
             DespawnProjectile();
         }
     }
@@ -92,7 +124,7 @@ public class NetworkProjectile : NetworkBehaviour
     [ClientRpc]
     private void SpawnHitEffectClientRpc(Vector3 hitPoint)
     {
-        if (hitEffectPrefab != null)
+        if (hitEffectPrefab != null && !isQuitting)
         {
             GameObject effect = Instantiate(hitEffectPrefab, hitPoint, Quaternion.identity);
             Destroy(effect, 2f); // 2 saniye sonra efekti yok et
@@ -101,7 +133,7 @@ public class NetworkProjectile : NetworkBehaviour
 
     private void DespawnProjectile()
     {
-        if (IsServer)
+        if (IsServer && !isQuitting)
         {
             if (NetworkObject != null && NetworkObject.IsSpawned)
             {
