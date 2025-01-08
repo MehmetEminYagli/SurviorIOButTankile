@@ -5,12 +5,40 @@ public class ShootingSystem : NetworkBehaviour, IShooter
 {
     [Header("Spawn Settings")]
     [SerializeField] private NetworkObject projectilePrefab;
+    [SerializeField] private Transform shootSpawnPoint; // Mermi çıkış noktası
 
     [Header("Shooting Settings")]
     [SerializeField] private float shootCooldown = 0.5f;
     [SerializeField] private float projectileSpeed = 20f;
 
+    [Header("Turret Settings")]
+    [SerializeField] private Transform turretTransform;
+    
     private float lastShootTime;
+    private ITurretRotation turretRotation;
+
+    private void Awake()
+    {
+        turretRotation = GetComponent<ITurretRotation>();
+        if (turretRotation == null)
+        {
+            turretRotation = gameObject.AddComponent<NetworkTurretRotation>();
+        }
+        
+        if (turretTransform != null)
+        {
+            turretRotation.SetTurretTransform(turretTransform);
+        }
+        else
+        {
+            Debug.LogError("Turret transform is not assigned in ShootingSystem!");
+        }
+
+        if (shootSpawnPoint == null)
+        {
+            Debug.LogError("ShootSpawn point is not assigned in ShootingSystem!");
+        }
+    }
 
     public bool CanShoot => Time.time - lastShootTime >= shootCooldown;
 
@@ -18,24 +46,26 @@ public class ShootingSystem : NetworkBehaviour, IShooter
     {
         if (!CanShoot) return;
 
+        // Turret'in baktığı yönü ve mermi çıkış noktasını kullan
+        Vector3 actualSpawnPosition = shootSpawnPoint != null ? shootSpawnPoint.position : spawnPosition;
+        Vector3 shootDirection = turretTransform != null ? turretTransform.forward : direction;
+
         if (IsServer)
         {
-            HandleShoot(direction, spawnPosition);
+            HandleShoot(shootDirection, actualSpawnPosition);
         }
         else if (IsClient)
         {
-            ShootServerRpc(direction, spawnPosition);
+            ShootServerRpc(shootDirection, actualSpawnPosition);
         }
 
-        // Local efektler için
-        PlayShootEffectsLocally(direction, spawnPosition);
+        PlayShootEffectsLocally(shootDirection, actualSpawnPosition);
         lastShootTime = Time.time;
     }
 
     private void PlayShootEffectsLocally(Vector3 direction, Vector3 spawnPosition)
     {
         // Burada lokal efektler eklenebilir (ses, partikül vb.)
-        // Bu metod hem client hem de server tarafında çalışır
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -55,7 +85,7 @@ public class ShootingSystem : NetworkBehaviour, IShooter
     [ClientRpc]
     private void ShootClientRpc(Vector3 direction, Vector3 spawnPosition)
     {
-        if (IsServer) return; // Server zaten efektleri oynatmış olacak
+        if (IsServer) return;
         PlayShootEffectsLocally(direction, spawnPosition);
     }
 
@@ -63,7 +93,12 @@ public class ShootingSystem : NetworkBehaviour, IShooter
     {
         if (!IsServer) return;
 
-        NetworkObject projectileInstance = Instantiate(projectilePrefab, spawnPosition, Quaternion.LookRotation(direction));
+        // Turret'in rotasyonunu kullanarak mermiyi oluştur
+        Quaternion projectileRotation = turretTransform != null ? 
+            turretTransform.rotation : 
+            Quaternion.LookRotation(direction);
+
+        NetworkObject projectileInstance = Instantiate(projectilePrefab, spawnPosition, projectileRotation);
         
         if (projectileInstance != null)
         {
@@ -71,9 +106,9 @@ public class ShootingSystem : NetworkBehaviour, IShooter
             if (networkProjectile != null)
             {
                 projectileInstance.Spawn();
+                // Turret'in forward yönünü kullanarak mermi hızını ayarla
                 networkProjectile.Initialize(direction.normalized * projectileSpeed);
                 
-                // Spawn olan oyuncunun collider'ını ignore et
                 if (TryGetComponent<Collider>(out var playerCollider))
                 {
                     Physics.IgnoreCollision(projectileInstance.GetComponent<Collider>(), playerCollider, true);
