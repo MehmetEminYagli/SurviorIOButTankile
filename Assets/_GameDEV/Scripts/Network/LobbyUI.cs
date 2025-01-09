@@ -2,8 +2,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
-using System.Threading.Tasks;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
+using System;
 
 public class LobbyUI : MonoBehaviour
 {
@@ -167,12 +170,41 @@ public class LobbyUI : MonoBehaviour
 
     private async void OnJoinLobbyClicked()
     {
-        if (string.IsNullOrEmpty(lobbyCodeInput.text)) return;
-
-        bool success = await LobbyManager.Instance.JoinLobbyByCode(lobbyCodeInput.text);
-        if (success)
+        if (string.IsNullOrEmpty(lobbyCodeInput.text))
         {
-            ShowLobbyRoom();
+            Debug.LogWarning("Please enter a lobby code");
+            return;
+        }
+
+        try
+        {
+            // Join butonu ve input field'ı devre dışı bırak
+            joinLobbyButton.interactable = false;
+            lobbyCodeInput.interactable = false;
+
+            Debug.Log($"Attempting to join lobby with code: {lobbyCodeInput.text}");
+            bool success = await LobbyManager.Instance.JoinLobbyByCode(lobbyCodeInput.text);
+            
+            if (success)
+            {
+                ShowLobbyRoom();
+                UpdateLobbyRoomUI(LobbyManager.Instance.currentLobby.Name, lobbyCodeInput.text);
+                RefreshPlayerList();
+            }
+            else
+            {
+                Debug.LogError($"Failed to join lobby with code: {lobbyCodeInput.text}");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error joining lobby: {e.Message}");
+        }
+        finally
+        {
+            // UI elementlerini tekrar aktif et
+            joinLobbyButton.interactable = true;
+            lobbyCodeInput.interactable = true;
         }
     }
 
@@ -258,7 +290,6 @@ public class LobbyUI : MonoBehaviour
         List<string> players = LobbyManager.Instance.GetPlayersInLobby();
         Dictionary<string, PlayerListItem> newPlayerListItems = new Dictionary<string, PlayerListItem>();
 
-        // Mevcut oyuncuları güncelle veya yeni ekle
         foreach (string playerName in players)
         {
             PlayerListItem item;
@@ -266,13 +297,11 @@ public class LobbyUI : MonoBehaviour
 
             if (playerListItems.ContainsKey(playerName))
             {
-                // Mevcut oyuncuyu koru
                 item = playerListItems[playerName];
                 playerItem = item.nameText.transform.parent.gameObject;
             }
             else
             {
-                // Yeni oyuncu ekle
                 playerItem = Instantiate(playerListItemPrefab, playerListContent);
                 item = new PlayerListItem
                 {
@@ -370,6 +399,7 @@ public class LobbyUI : MonoBehaviour
     {
         if (LobbyManager.Instance != null)
         {
+            // Materyal seçimini güncelle ve kuyruğa ekle
             LobbyManager.Instance.SelectMaterial(currentMaterialIndex);
             UpdateMaterialPreview();
             

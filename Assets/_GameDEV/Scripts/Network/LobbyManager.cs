@@ -18,17 +18,23 @@ public class LobbyManager : MonoBehaviour
     
     [SerializeField] private int maxPlayers = 4;
     
-    private Lobby currentLobby;
+    public Lobby currentLobby { get; private set; }
     private float heartbeatTimer;
     private float lobbyUpdateTimer;
     private const float LOBBY_HEARTBEAT_INTERVAL = 15f;
-    private const float LOBBY_UPDATE_INTERVAL = 1.5f;
+    private const float LOBBY_UPDATE_INTERVAL = 3f;
+    private float lastLobbyUpdateTime = 0f;
     private string playerName = "Player";
     
     [SerializeField] private PlayerMaterialsData playerMaterials;
     
     private Dictionary<string, int> playerMaterialSelections = new Dictionary<string, int>();
     private int localPlayerMaterialIndex = 0;
+
+    private Queue<int> materialUpdateQueue = new Queue<int>();
+    private bool isProcessingMaterialUpdate = false;
+    private const float MATERIAL_UPDATE_INTERVAL = 1f;
+    private float lastMaterialUpdateTime = 0f;
 
     private void Awake()
     {
@@ -52,6 +58,7 @@ public class LobbyManager : MonoBehaviour
     {
         HandleLobbyHeartbeat();
         HandleLobbyPollForUpdates();
+        ProcessMaterialUpdateQueue();
     }
 
     public async Task<bool> AuthenticatePlayer(string playerNickname)
@@ -87,12 +94,14 @@ public class LobbyManager : MonoBehaviour
             // Create player data
             var playerData = new Dictionary<string, PlayerDataObject>
             {
-                { "Nickname", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, playerName) }
+                { "Nickname", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, playerName) },
+                { "MaterialIndex", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, "0") }
             };
 
-            // Create lobby
+            // Create lobby options with visibility
             CreateLobbyOptions options = new CreateLobbyOptions
             {
+                IsPrivate = false, // Lobiyi public yap
                 Data = new Dictionary<string, DataObject>
                 {
                     { "RelayJoinCode", new DataObject(DataObject.VisibilityOptions.Public, joinCode) },
@@ -105,6 +114,10 @@ public class LobbyManager : MonoBehaviour
             };
 
             currentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
+            
+            // Lobi oluşturulduktan hemen sonra bir kez daha güncelle
+            await UpdateLobby();
+            
             Debug.Log($"Created lobby with code: {lobbyCode}");
 
             // Setup Relay
@@ -137,21 +150,17 @@ public class LobbyManager : MonoBehaviour
             QueryLobbiesOptions options = new QueryLobbiesOptions
             {
                 Count = 25,
-                Filters = new List<QueryFilter>
-                {
-                    new QueryFilter(
-                        field: QueryFilter.FieldOptions.AvailableSlots,
-                        op: QueryFilter.OpOptions.GT,
-                        value: "0"
-                    )
-                }
+                Filters = new List<QueryFilter>()  // Filtreleri kaldıralım
             };
 
-            QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync(options);
-            
-            if (queryResponse.Results.Count == 0)
+            QueryResponse queryResponse;
+            try
             {
-                Debug.LogError("No lobby found with the given code");
+                queryResponse = await LobbyService.Instance.QueryLobbiesAsync(options);
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.LogError($"Failed to query lobbies: {e.Message}");
                 return false;
             }
 
@@ -170,51 +179,87 @@ public class LobbyManager : MonoBehaviour
 
             if (targetLobby == null)
             {
-                Debug.LogError("No lobby found with the given code");
+                Debug.LogError($"No lobby found with code: {lobbyCode}");
                 return false;
+            }
+
+            // Eğer oyuncu zaten bir lobideyse ve farklı bir lobiye katılmaya çalışıyorsa
+            if (currentLobby != null)
+            {
+                if (currentLobby.Id == targetLobby.Id)
+                {
+                    Debug.LogWarning("Player is already in this lobby!");
+                    return false;
+                }
+
+                Debug.Log("Leaving current lobby before joining new one...");
+                try
+                {
+                    await LeaveLobby();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Failed to leave current lobby: {e.Message}");
+                    return false;
+                }
             }
 
             // Create player data
             var playerData = new Dictionary<string, PlayerDataObject>
             {
-                { "Nickname", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, playerName) }
+                { "Nickname", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, playerName) },
+                { "MaterialIndex", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, "0") }
             };
 
             JoinLobbyByIdOptions joinOptions = new JoinLobbyByIdOptions
             {
-                Player = new Player
-                {
-                    Data = playerData
-                }
+                Player = new Player { Data = playerData }
             };
 
-            currentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(targetLobby.Id, joinOptions);
-            
-            if (currentLobby == null)
+            try
             {
-                Debug.LogError("Failed to join lobby: Lobby not found");
+                currentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(targetLobby.Id, joinOptions);
+                Debug.Log($"Successfully joined lobby: {targetLobby.Name}");
+            }
+            catch (LobbyServiceException e)
+            {
+                if (e.Message.Contains("already a member"))
+                {
+                    Debug.LogWarning("Player is already a member of this lobby");
+                    return false;
+                }
+                Debug.LogError($"Failed to join lobby: {e.Message}");
                 return false;
             }
 
             if (!currentLobby.Data.ContainsKey("RelayJoinCode"))
             {
-                Debug.LogError("Failed to join lobby: Relay join code not found");
+                Debug.LogError("Relay join code not found in lobby data");
                 return false;
             }
 
             string relayJoinCode = currentLobby.Data["RelayJoinCode"].Value;
             Debug.Log($"Got relay join code: {relayJoinCode}");
 
-            var joinAllocation = await Unity.Services.Relay.RelayService.Instance.JoinAllocationAsync(relayJoinCode);
-            RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-            
-            NetworkManager.Singleton.StartClient();
-            return true;
+            try
+            {
+                var joinAllocation = await RelayService.Instance.JoinAllocationAsync(relayJoinCode);
+                var relayServerData = new RelayServerData(joinAllocation, "dtls");
+                NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+                
+                NetworkManager.Singleton.StartClient();
+                Debug.Log("Successfully started network client");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to setup relay: {e.Message}");
+                return false;
+            }
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to join lobby: {e.Message}");
+            Debug.LogError($"Unexpected error while joining lobby: {e.Message}\nStack trace: {e.StackTrace}");
             return false;
         }
     }
@@ -271,22 +316,41 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-            currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
-            
-            // Lobby güncellendiğinde materyal seçimlerini güncelle
-            foreach (var player in currentLobby.Players)
+            // Rate limit kontrolü ekleyelim
+            if (Time.time - lastLobbyUpdateTime < LOBBY_UPDATE_INTERVAL)
             {
-                if (player.Data != null && 
-                    player.Data.ContainsKey("Nickname") && 
-                    player.Data.ContainsKey("MaterialIndex"))
+                return;
+            }
+
+            if (currentLobby != null)
+            {
+                currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
+                lastLobbyUpdateTime = Time.time;
+                
+                // Materyal seçimlerini güncelle
+                foreach (var player in currentLobby.Players)
                 {
-                    string playerNickname = player.Data["Nickname"].Value;
-                    if (int.TryParse(player.Data["MaterialIndex"].Value, out int materialIndex))
+                    if (player.Data != null && 
+                        player.Data.ContainsKey("Nickname") && 
+                        player.Data.ContainsKey("MaterialIndex"))
                     {
-                        playerMaterialSelections[playerNickname] = materialIndex;
+                        string playerNickname = player.Data["Nickname"].Value;
+                        if (int.TryParse(player.Data["MaterialIndex"].Value, out int materialIndex))
+                        {
+                            playerMaterialSelections[playerNickname] = materialIndex;
+                        }
                     }
                 }
             }
+        }
+        catch (LobbyServiceException e)
+        {
+            if (e.Message.Contains("Rate limit"))
+            {
+                // Rate limit aşıldıysa sessizce devam et
+                return;
+            }
+            Debug.LogError($"Failed to update lobby: {e.Message}");
         }
         catch (Exception e)
         {
@@ -408,7 +472,7 @@ public class LobbyManager : MonoBehaviour
         return currentLobby?.Players.Count ?? 0;
     }
 
-    public async void SelectMaterial(int materialIndex)
+    public void SelectMaterial(int materialIndex)
     {
         if (materialIndex >= 0 && materialIndex < playerMaterials.availableMaterials.Count)
         {
@@ -420,32 +484,64 @@ public class LobbyManager : MonoBehaviour
                 playerMaterialSelections[playerName] = materialIndex;
             }
 
-            // Update player data in lobby
-            if (currentLobby != null)
+            // Güncelleme kuyruğuna ekle
+            if (!materialUpdateQueue.Contains(materialIndex))
             {
-                await UpdatePlayerMaterialData(materialIndex);
+                materialUpdateQueue.Enqueue(materialIndex);
             }
         }
     }
 
-    private async Task UpdatePlayerMaterialData(int materialIndex)
+    private void ProcessMaterialUpdateQueue()
     {
-        try
+        if (materialUpdateQueue.Count > 0 && !isProcessingMaterialUpdate && 
+            Time.time - lastMaterialUpdateTime >= MATERIAL_UPDATE_INTERVAL)
         {
+            isProcessingMaterialUpdate = true;
+            int materialIndex = materialUpdateQueue.Dequeue();
+            UpdatePlayerMaterialDataAsync(materialIndex);
+        }
+    }
+
+    private async void UpdatePlayerMaterialDataAsync(int materialIndex)
+    {
+        try 
+        {
+            if (currentLobby == null) return;
+
             var playerData = new Dictionary<string, PlayerDataObject>
             {
                 { "Nickname", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, playerName) },
                 { "MaterialIndex", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, materialIndex.ToString()) }
             };
 
-            await LobbyService.Instance.UpdatePlayerAsync(currentLobby.Id, AuthenticationService.Instance.PlayerId, new UpdatePlayerOptions
+            await LobbyService.Instance.UpdatePlayerAsync(
+                currentLobby.Id,
+                AuthenticationService.Instance.PlayerId,
+                new UpdatePlayerOptions { Data = playerData }
+            );
+
+            lastMaterialUpdateTime = Time.time;
+        }
+        catch (LobbyServiceException e)
+        {
+            if (!e.Message.Contains("Rate limit"))
             {
-                Data = playerData
-            });
+                Debug.LogError($"Failed to update player material data: {e.Message}");
+            }
+            // Rate limit hatası durumunda, güncellemeyi tekrar kuyruğa ekle
+            else if (materialUpdateQueue.Count == 0)
+            {
+                materialUpdateQueue.Enqueue(materialIndex);
+            }
         }
         catch (Exception e)
         {
             Debug.LogError($"Failed to update player material data: {e.Message}");
+        }
+        finally
+        {
+            isProcessingMaterialUpdate = false;
         }
     }
 

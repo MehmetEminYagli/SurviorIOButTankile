@@ -525,7 +525,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxPlayers: 4
-  playerMaterials: {fileID: 11400000, guid: cf8a411e7b68057418827a5d29753416, type: 2}
+  playerMaterials: {fileID: 11400000, guid: af130d307a6b6bf4aad35b65786799cd, type: 2}
 --- !u!4 &1251694047
 Transform:
   m_ObjectHideFlags: 0
