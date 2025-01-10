@@ -74,6 +74,14 @@ public class PlayerController : MonoBehaviour
         cameraTransform = newCamera;
     }
 
+    public void MobileAttackButton()
+    {
+        if (_shooter != null)
+        {
+            HandleShooting();
+        }
+    }
+
     private void Update()
     {
         if (!isInitialized) return;
@@ -87,6 +95,7 @@ public class PlayerController : MonoBehaviour
             HandleShooting();
         }
     }
+
 
     private void FixedUpdate()
     {

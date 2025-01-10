@@ -21,6 +21,14 @@ public class DashController : MonoBehaviour
         }
     }
 
+    public void MobileDashButton()
+    {
+        if (canDash)
+        {
+            StartCoroutine(Dash());
+        }
+    }
+
     private IEnumerator Dash()
     {
         isDashing = true;
