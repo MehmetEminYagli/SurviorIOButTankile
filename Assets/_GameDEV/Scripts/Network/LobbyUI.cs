@@ -72,6 +72,9 @@ public class LobbyUI : MonoBehaviour
             materialPreviewImage.color = Color.white;
             UpdateMaterialPreview();
         }
+
+        // Game Scene'den geldiğimizde auth durumunu kontrol et
+        CheckAuthenticationStatus();
     }
 
     private void ValidateReferences()
@@ -457,5 +460,17 @@ public class LobbyUI : MonoBehaviour
         
         if (previousMaterialButton != null)
             previousMaterialButton.onClick.RemoveListener(PreviousMaterial);
+    }
+
+    private void CheckAuthenticationStatus()
+    {
+        if (Unity.Services.Authentication.AuthenticationService.Instance.IsSignedIn)
+        {
+            ShowMainMenu();
+        }
+        else
+        {
+            ShowAuthPanel();
+        }
     }
 } 

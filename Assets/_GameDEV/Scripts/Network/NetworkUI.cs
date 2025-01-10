@@ -5,13 +5,17 @@ using TMPro;
 public class NetworkUI : MonoBehaviour
 {
     [Header("UI Elements")]
-    [SerializeField] private Button hostButton;
-    [SerializeField] private Button clientButton;
-    [SerializeField] private Button disconnectButton;
     [SerializeField] private TMP_Text playerCountText;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private GameObject menuPanel;
     [SerializeField] private GameObject gamePanel;
+    [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private Button settingsButton;
+    [SerializeField] private Button mainMenuButton;
+    [SerializeField] private Button closeSettingsButton;
+    [SerializeField] private Button hostButton;
+    [SerializeField] private Button clientButton;
+    [SerializeField] private Button disconnectButton;
 
     private NetworkManagerController networkManager;
     private NetworkRoomManager roomManager;
@@ -60,6 +64,9 @@ public class NetworkUI : MonoBehaviour
         if (isInitialized)
         {
             UnsubscribeFromEvents();
+            settingsButton?.onClick.RemoveListener(OnSettingsButtonClicked);
+            mainMenuButton?.onClick.RemoveListener(OnMainMenuButtonClicked);
+            closeSettingsButton?.onClick.RemoveListener(OnCloseSettingsButtonClicked);
         }
     }
 
@@ -70,9 +77,14 @@ public class NetworkUI : MonoBehaviour
         hostButton?.onClick.AddListener(OnHostButtonClicked);
         clientButton?.onClick.AddListener(OnClientButtonClicked);
         disconnectButton?.onClick.AddListener(OnDisconnectButtonClicked);
+        settingsButton?.onClick.AddListener(OnSettingsButtonClicked);
+        mainMenuButton?.onClick.AddListener(OnMainMenuButtonClicked);
+        closeSettingsButton?.onClick.AddListener(OnCloseSettingsButtonClicked);
 
         // Initial UI state
         UpdateUI(false);
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
     }
 
     private void SubscribeToEvents()
@@ -187,5 +199,30 @@ public class NetworkUI : MonoBehaviour
     {
         if (menuPanel != null) menuPanel.SetActive(false);
         if (gamePanel != null) gamePanel.SetActive(true);
+    }
+
+    private void OnSettingsButtonClicked()
+    {
+        if (settingsPanel != null)
+            settingsPanel.SetActive(true);
+    }
+
+    private void OnMainMenuButtonClicked()
+    {
+        if (networkManager != null)
+        {
+            networkManager.DisconnectClient();
+            if (menuPanel != null)
+                menuPanel.SetActive(true);
+            if (settingsPanel != null)
+                settingsPanel.SetActive(false);
+            UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyScene");
+        }
+    }
+
+    private void OnCloseSettingsButtonClicked()
+    {
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
     }
 } 
