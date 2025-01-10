@@ -642,7 +642,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   healthFillImage: {fileID: 991499402058281139}
   healthBarCanvas: {fileID: 4567890206236341102}
-  heightOffset: 2
+  heightOffset: 3
 --- !u!1 &3028539732427871626
 GameObject:
   m_ObjectHideFlags: 0
