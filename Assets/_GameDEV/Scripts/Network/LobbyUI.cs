@@ -54,6 +54,7 @@ public class LobbyUI : MonoBehaviour
 
     private void Start()
     {
+        InitializeUnityServices();
         SetupUI();
         ValidateReferences();
 
@@ -72,9 +73,21 @@ public class LobbyUI : MonoBehaviour
             materialPreviewImage.color = Color.white;
             UpdateMaterialPreview();
         }
+    }
 
-        // Game Scene'den geldiğimizde auth durumunu kontrol et
-        CheckAuthenticationStatus();
+    private async void InitializeUnityServices()
+    {
+        try
+        {
+            await UnityServices.InitializeAsync();
+            // Unity Services başlatıldıktan sonra auth durumunu kontrol et
+            CheckAuthenticationStatus();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to initialize Unity Services: {e.Message}");
+            ShowAuthPanel();
+        }
     }
 
     private void ValidateReferences()
