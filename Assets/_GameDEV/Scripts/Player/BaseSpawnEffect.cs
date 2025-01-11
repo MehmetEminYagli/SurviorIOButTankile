@@ -67,7 +67,7 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
         transform.rotation = Quaternion.Euler(spawnRotation);
         currentColor = playerColor;
         
-        if (IsServer || IsLocalPlayer)
+        if (IsOwner || IsLocalPlayer)
         {
             ApplyEffectVisuals(playerColor);
         }
@@ -138,7 +138,7 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
     [ClientRpc]
     protected virtual void PlayEffectClientRpc(Vector3 position, Color color)
     {
-        if (!IsServer && !IsLocalPlayer)
+        if (!IsServer && IsLocalPlayer)
         {
             Debug.Log($"[Client] Playing effect {gameObject.name} at position {position}");
             position.y = 0.01f;
