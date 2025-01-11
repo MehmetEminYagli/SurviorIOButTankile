@@ -195,9 +195,17 @@ public class SpawnEffectManager : NetworkBehaviour
             activeEffects[clientId].StopEffect();
         }
         
-        Vector3 spawnPosition = new Vector3(position.x, 0.1f, position.z);
-        GameObject effectInstance = Instantiate(effectPrefabs[effectName], spawnPosition, Quaternion.Euler(-90f, 0f, 0f));
+        Vector3 spawnPosition = new Vector3(position.x, 0.01f, position.z);
+        GameObject effectInstance = Instantiate(effectPrefabs[effectName], spawnPosition, Quaternion.identity);
         Debug.Log($"Instantiated effect: {effectInstance.name} at position: {spawnPosition}");
+        
+        // Get the BaseSpawnEffect component to get the rotation
+        BaseSpawnEffect baseEffect = effectInstance.GetComponent<BaseSpawnEffect>();
+        if (baseEffect != null)
+        {
+            // Apply the rotation from the prefab
+            effectInstance.transform.rotation = Quaternion.Euler(baseEffect.GetSpawnRotation());
+        }
         
         // Particle System rengini ayarla
         var particleSystems = effectInstance.GetComponentsInChildren<ParticleSystem>(true);
@@ -247,16 +255,22 @@ public class SpawnEffectManager : NetworkBehaviour
     {
         if (IsServer) return;
         
-        NetworkObject networkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjectId];
-        if (networkObject != null)
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
         {
-            var particleSystems = networkObject.GetComponentsInChildren<ParticleSystem>(true);
-            foreach (var ps in particleSystems)
+            if (networkObject != null)
             {
-                SetParticleSystemColor(ps, color);
-                ps.Clear();
-                ps.Play();
+                var particleSystems = networkObject.GetComponentsInChildren<ParticleSystem>(true);
+                foreach (var ps in particleSystems)
+                {
+                    SetParticleSystemColor(ps, color);
+                    ps.Clear();
+                    ps.Play();
+                }
             }
+        }
+        else
+        {
+            Debug.LogWarning($"NetworkObject with ID {networkObjectId} not found in SpawnedObjects dictionary");
         }
     }
     

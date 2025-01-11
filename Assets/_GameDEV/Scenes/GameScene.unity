@@ -633,6 +633,8 @@ MonoBehaviour:
   availableEffects:
   - effectName: MagicAura
     effectPrefab: {fileID: 100006, guid: 60bc526f4be1e044ab9e46340b82ffb3, type: 3}
+  - effectName: loot
+    effectPrefab: {fileID: 7289530526164928630, guid: 5dda30a1e5609b64a85453787a8704f0, type: 3}
   defaultEffectName: MagicAura
 --- !u!1 &666774500
 GameObject:

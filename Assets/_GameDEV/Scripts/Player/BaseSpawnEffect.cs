@@ -1,83 +1,92 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections;
 
 public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
 {
+    [Header("Effect Settings")]
     [SerializeField] protected ParticleSystem particleSystem;
     [SerializeField] protected float effectDuration = 2f;
+
+    [Header("Rotation Settings")]
+    [Tooltip("The rotation of the effect when spawned (in degrees)")]
+    [SerializeField] protected Vector3 spawnRotation = Vector3.zero;
+    
+    // Rotasyonu dışarıdan okumak için public getter
+    public Vector3 GetSpawnRotation() => spawnRotation;
     
     protected Color currentColor;
-
-    private void Start()
+    private Coroutine destroyCoroutine;
+    private NetworkVariable<bool> shouldDestroy = new NetworkVariable<bool>(false);
+    
+    public override void OnNetworkSpawn()
     {
-        // Başlangıçta rotasyonu ayarla
-        transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+        base.OnNetworkSpawn();
+        shouldDestroy.OnValueChanged += OnShouldDestroyChanged;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        shouldDestroy.OnValueChanged -= OnShouldDestroyChanged;
+    }
+    
+    private void OnShouldDestroyChanged(bool previousValue, bool newValue)
+    {
+        if (newValue)
+        {
+            Debug.Log($"[{(IsServer ? "Server" : "Client")}] Effect {gameObject.name} received destroy signal");
+            StopEffect();
+            if (!IsServer)
+            {
+                StartCoroutine(DestroyAfterFrame());
+            }
+        }
+    }
+
+    private IEnumerator DestroyAfterFrame()
+    {
+        yield return new WaitForEndOfFrame();
+        Debug.Log($"[{(IsServer ? "Server" : "Client")}] Destroying effect {gameObject.name}");
+        Destroy(gameObject);
     }
     
     public virtual void PlayEffect(Vector3 position, Color playerColor)
     {
         if (!IsSpawned) return;
         
-        transform.position = position;
-        transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
-        currentColor = playerColor;
+        Debug.Log($"[{(IsServer ? "Server" : "Client")}] Playing effect {gameObject.name} at position {position}");
         
-        if (particleSystem != null)
+        if (destroyCoroutine != null)
         {
-            // Ana particle system'in rengini ayarla
-            var main = particleSystem.main;
-            main.startColor = new ParticleSystem.MinMaxGradient(playerColor);
-            
-            // Trail renderer varsa güncelle
-            var trail = particleSystem.GetComponent<TrailRenderer>();
-            if (trail != null)
-            {
-                trail.startColor = playerColor;
-                trail.endColor = new Color(playerColor.r, playerColor.g, playerColor.b, 0f);
-            }
-            
-            // Tüm alt particle systemlerin rengini ayarla
-            var childSystems = GetComponentsInChildren<ParticleSystem>();
-            foreach (var childSystem in childSystems)
-            {
-                if (childSystem != particleSystem)
-                {
-                    var childMain = childSystem.main;
-                    childMain.startColor = new ParticleSystem.MinMaxGradient(playerColor);
-                    
-                    // Alt sistemlerin trail renderer'larını da güncelle
-                    var childTrail = childSystem.GetComponent<TrailRenderer>();
-                    if (childTrail != null)
-                    {
-                        childTrail.startColor = playerColor;
-                        childTrail.endColor = new Color(playerColor.r, playerColor.g, playerColor.b, 0f);
-                    }
-                }
-            }
-            
-            particleSystem.Clear();
-            particleSystem.Play();
+            StopCoroutine(destroyCoroutine);
         }
         
-        PlayEffectClientRpc(position, playerColor);
+        position.y = 0.01f;
+        transform.position = position;
+        transform.rotation = Quaternion.Euler(spawnRotation);
+        currentColor = playerColor;
+        
+        if (IsServer || IsLocalPlayer)
+        {
+            ApplyEffectVisuals(playerColor);
+        }
+        
+        if (IsServer)
+        {
+            PlayEffectClientRpc(position, playerColor);
+            Debug.Log($"[Server] Starting destroy timer for effect {gameObject.name}");
+            destroyCoroutine = StartCoroutine(InitiateDestroySequence());
+        }
     }
     
-    [ClientRpc]
-    protected virtual void PlayEffectClientRpc(Vector3 position, Color color)
+    private void ApplyEffectVisuals(Color color)
     {
-        if (IsServer) return;
-        
-        transform.position = position;
-        transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
-        currentColor = color;
-        
         if (particleSystem != null)
         {
-            // Ana particle system'in rengini ayarla
             var main = particleSystem.main;
             main.startColor = new ParticleSystem.MinMaxGradient(color);
             
-            // Trail renderer varsa güncelle
             var trail = particleSystem.GetComponent<TrailRenderer>();
             if (trail != null)
             {
@@ -85,7 +94,6 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
                 trail.endColor = new Color(color.r, color.g, color.b, 0f);
             }
             
-            // Tüm alt particle systemlerin rengini ayarla
             var childSystems = GetComponentsInChildren<ParticleSystem>();
             foreach (var childSystem in childSystems)
             {
@@ -94,7 +102,6 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
                     var childMain = childSystem.main;
                     childMain.startColor = new ParticleSystem.MinMaxGradient(color);
                     
-                    // Alt sistemlerin trail renderer'larını da güncelle
                     var childTrail = childSystem.GetComponent<TrailRenderer>();
                     if (childTrail != null)
                     {
@@ -109,14 +116,48 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
         }
     }
     
+    private IEnumerator InitiateDestroySequence()
+    {
+        yield return new WaitForSeconds(effectDuration);
+        
+        Debug.Log($"[Server] Initiating destroy sequence for effect {gameObject.name}");
+        shouldDestroy.Value = true;
+        
+        yield return new WaitForEndOfFrame();
+        
+        if (NetworkObject != null && NetworkObject.IsSpawned)
+        {
+            Debug.Log($"[Server] Despawning network object for effect {gameObject.name}");
+            NetworkObject.Despawn(true);
+        }
+        
+        yield return new WaitForEndOfFrame();
+        Destroy(gameObject);
+    }
+    
+    [ClientRpc]
+    protected virtual void PlayEffectClientRpc(Vector3 position, Color color)
+    {
+        if (!IsServer && !IsLocalPlayer)
+        {
+            Debug.Log($"[Client] Playing effect {gameObject.name} at position {position}");
+            position.y = 0.01f;
+            transform.position = position;
+            transform.rotation = Quaternion.Euler(spawnRotation);
+            currentColor = color;
+            
+            ApplyEffectVisuals(color);
+        }
+    }
+    
     public virtual void StopEffect()
     {
+        Debug.Log($"[{(IsServer ? "Server" : "Client")}] Stopping particle systems for effect {gameObject.name}");
         if (particleSystem != null)
         {
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             particleSystem.Clear();
             
-            // Alt particle systemleri de durdur ve temizle
             var childSystems = GetComponentsInChildren<ParticleSystem>();
             foreach (var childSystem in childSystems)
             {
@@ -129,20 +170,20 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
         }
     }
     
+    private void OnDestroy()
+    {
+        Debug.Log($"[{(IsServer ? "Server" : "Client")}] OnDestroy called for effect {gameObject.name}");
+        if (destroyCoroutine != null)
+        {
+            StopCoroutine(destroyCoroutine);
+        }
+    }
+    
     protected virtual void OnValidate()
     {
         if (particleSystem == null)
         {
             particleSystem = GetComponent<ParticleSystem>();
-        }
-    }
-
-    private void LateUpdate()
-    {
-        // Her frame'de rotasyonu kontrol et
-        if (transform.rotation != Quaternion.Euler(-90f, 0f, 0f))
-        {
-            transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
         }
     }
 } 
