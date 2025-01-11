@@ -169,23 +169,31 @@ public class MaterialManager : MonoBehaviour
             return;
         }
 
-        // Aktif renderer'ları bul
-        Renderer[] renderers = GetComponentsInChildren<Renderer>();
-        if (renderers.Length == 0)
+        // Aktif materyal indeksine göre materyali al
+        Material targetMaterial = materialsData.availableMaterials[currentMaterialIndex].material;
+        if (targetMaterial == null)
         {
-            Debug.LogWarning("No renderers found!");
+            Debug.LogError($"Material at index {currentMaterialIndex} is null!");
             return;
         }
 
-        // Tüm renderer'ların materyallerini güncelle
-        foreach (Renderer renderer in renderers)
+        // Her renderer için materyali güvenli bir şekilde uygula
+        foreach (var rendererData in materialRenderers)
         {
-            if (renderer.sharedMaterial != null)
+            if (rendererData.meshRenderer != null)
             {
-                renderer.material.CopyPropertiesFromMaterial(renderer.sharedMaterial);
+                Material[] materials = rendererData.meshRenderer.materials;
+                if (rendererData.materialIndex < materials.Length)
+                {
+                    // Yeni bir materyal instance'ı oluştur
+                    Material newMaterial = new Material(targetMaterial);
+                    materials[rendererData.materialIndex] = newMaterial;
+                    rendererData.meshRenderer.materials = materials;
+                }
             }
         }
 
+        currentMaterial = targetMaterial;
         Debug.Log($"Force updated materials for index: {currentMaterialIndex}");
     }
 
