@@ -486,4 +486,9 @@ public class LobbyUI : MonoBehaviour
             ShowAuthPanel();
         }
     }
+
+    public int GetCurrentMaterialIndex()
+    {
+        return currentMaterialIndex;
+    }
 } 

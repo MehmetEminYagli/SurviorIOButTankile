@@ -59,20 +59,71 @@ public class NetworkSpawner : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        Vector3 spawnPosition = GetNextSpawnPoint();
-        GameObject playerInstance = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
-        
+        Vector3 spawnPos = GetNextSpawnPoint();
+        GameObject playerInstance = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
         NetworkObject networkObject = playerInstance.GetComponent<NetworkObject>();
+
         if (networkObject != null)
         {
-            networkObject.SpawnAsPlayerObject(clientId, true);
+            networkObject.SpawnAsPlayerObject(clientId);
             spawnedPlayers.Add(clientId);
-            Debug.Log($"Spawned player for client {clientId} at position {spawnPosition}");
+            
+            // MaterialManager'ı bul
+            MaterialManager materialManager = playerInstance.GetComponent<MaterialManager>();
+            if (materialManager != null)
+            {
+                // Her client için kendi materyal indeksini al
+                int selectedMaterialIndex = LobbyManager.Instance.GetPlayerMaterialIndex(clientId);
+                
+                // Materyali uygula
+                materialManager.ApplyMaterialByIndex(selectedMaterialIndex);
+                
+                // Materyalin uygulanmasını bekle
+                materialManager.ForceUpdateMaterials();
+                
+                // Rengi doğrudan LobbyManager'dan al
+                Color playerColor = LobbyManager.Instance.GetPreviewColorByIndex(selectedMaterialIndex);
+                Debug.Log($"Selected material index for client {clientId}: {selectedMaterialIndex}");
+                Debug.Log($"Player color from LobbyManager: R:{playerColor.r}, G:{playerColor.g}, B:{playerColor.b}, A:{playerColor.a}");
+
+                // Alpha değerini 1 olarak ayarla
+                playerColor.a = 1f;
+
+                // Spawn efektini tüm clientlara bildir
+                NotifySpawnEffectClientRpc(clientId, spawnPos, selectedMaterialIndex, playerColor);
+            }
+            else
+            {
+                Debug.LogWarning("MaterialManager component not found on player instance!");
+            }
+
+            Debug.Log($"Spawned player for client {clientId} at position {spawnPos}");
         }
         else
         {
-            Debug.LogError($"PlayerPrefab does not have a NetworkObject component!");
+            Debug.LogError($"NetworkObject component not found on player prefab!");
             Destroy(playerInstance);
+        }
+    }
+
+    [ClientRpc]
+    private void NotifySpawnEffectClientRpc(ulong clientId, Vector3 spawnPos, int materialIndex, Color playerColor)
+    {
+        if (SpawnEffectManager.Instance != null)
+        {
+            // Eğer bu client kendi efektini spawn ediyorsa, kendi rengini kullan
+            if (clientId == NetworkManager.Singleton.LocalClientId)
+            {
+                Color localColor = LobbyManager.Instance.GetPreviewColorByIndex(
+                    LobbyManager.Instance.GetLocalPlayerMaterialIndex());
+                localColor.a = 1f;
+                SpawnEffectManager.Instance.PlaySpawnEffect(clientId, spawnPos, localColor);
+            }
+            else
+            {
+                // Diğer oyuncular için server'dan gelen rengi kullan
+                SpawnEffectManager.Instance.PlaySpawnEffect(clientId, spawnPos, playerColor);
+            }
         }
     }
 

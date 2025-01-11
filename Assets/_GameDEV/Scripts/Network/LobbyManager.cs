@@ -36,6 +36,9 @@ public class LobbyManager : MonoBehaviour
     private const float MATERIAL_UPDATE_INTERVAL = 1f;
     private float lastMaterialUpdateTime = 0f;
 
+    // NetworkVariable ekleyelim
+    public NetworkVariable<int> NetworkedMaterialIndex = new NetworkVariable<int>();
+
     private void Awake()
     {
         if (Instance == null)
@@ -384,20 +387,15 @@ public class LobbyManager : MonoBehaviour
 
     public void StartGame()
     {
-        if (IsLobbyHost())
+        if (!IsLobbyHost()) return;
+
+        // Seçilen materyal indeksini NetworkVariable'a ata
+        NetworkedMaterialIndex.Value = localPlayerMaterialIndex;
+
+        if (NetworkManager.Singleton.SceneManager != null)
         {
-            try
-            {
-                // Tüm oyuncular için sahne değişimini başlat
-                NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-                
-                // Sahne değişimi tamamlandığında çağrılacak event
-                NetworkManager.Singleton.SceneManager.OnLoadComplete += SceneManager_OnLoadComplete;
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Failed to start game: {e.Message}");
-            }
+            NetworkManager.Singleton.SceneManager.OnLoadComplete += SceneManager_OnLoadComplete;
+            NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
     }
 
@@ -600,5 +598,40 @@ public class LobbyManager : MonoBehaviour
     public int GetMaterialCount()
     {
         return playerMaterials != null ? playerMaterials.availableMaterials.Count : 0;
+    }
+
+    // Materyal indeksini almak için yeni bir metod
+    public int GetNetworkedMaterialIndex()
+    {
+        return NetworkedMaterialIndex.Value;
+    }
+
+    // Client ID'ye göre materyal indeksini almak için yeni metod
+    public int GetPlayerMaterialIndex(ulong clientId)
+    {
+        if (currentLobby == null) return 0;
+
+        // Eğer bu local oyuncunun client ID'si ise, local materyal indeksini döndür
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
+            return localPlayerMaterialIndex;
+        }
+
+        // Diğer oyuncular için lobby'den materyal indeksini bul
+        foreach (var player in currentLobby.Players)
+        {
+            if (player.Data != null && 
+                player.Data.ContainsKey("MaterialIndex") &&
+                NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId) &&
+                NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.OwnerClientId.ToString() == player.Id)
+            {
+                if (int.TryParse(player.Data["MaterialIndex"].Value, out int materialIndex))
+                {
+                    return materialIndex;
+                }
+            }
+        }
+
+        return 0; // Varsayılan değer
     }
 } 
