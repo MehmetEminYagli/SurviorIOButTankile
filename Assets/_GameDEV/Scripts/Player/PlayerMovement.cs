@@ -37,6 +37,7 @@ public class PlayerMovement : NetworkBehaviour, IMoveable
         if (direction != Vector3.zero)
         {
             Quaternion newRotation = Quaternion.LookRotation(direction, Vector3.up);
+            newRotation = Quaternion.Normalize(newRotation);
             rb.rotation = Quaternion.Lerp(rb.rotation, newRotation, Time.fixedDeltaTime * 10f);
             
             if (IsServer)
@@ -52,7 +53,8 @@ public class PlayerMovement : NetworkBehaviour, IMoveable
         {
             // Client tarafında pozisyon ve rotasyonu güncelle
             rb.MovePosition(Vector3.Lerp(rb.position, networkPosition.Value, Time.fixedDeltaTime * 10f));
-            rb.MoveRotation(Quaternion.Lerp(rb.rotation, networkRotation.Value, Time.fixedDeltaTime * 10f));
+            Quaternion targetRotation = Quaternion.Normalize(networkRotation.Value);
+            rb.MoveRotation(Quaternion.Lerp(rb.rotation, targetRotation, Time.fixedDeltaTime * 10f));
         }
     }
 
@@ -63,7 +65,7 @@ public class PlayerMovement : NetworkBehaviour, IMoveable
         {
             // İlk spawn olduğunda pozisyon ve rotasyonu senkronize et
             rb.position = networkPosition.Value;
-            rb.rotation = networkRotation.Value;
+            rb.rotation = Quaternion.Normalize(networkRotation.Value);
         }
     }
 }
