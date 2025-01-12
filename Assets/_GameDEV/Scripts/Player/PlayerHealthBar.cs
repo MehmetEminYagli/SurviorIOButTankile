@@ -80,7 +80,7 @@ public class PlayerHealthBar : NetworkBehaviour
         base.OnNetworkDespawn();
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         if (!isQuitting && healthComponent != null)
         {

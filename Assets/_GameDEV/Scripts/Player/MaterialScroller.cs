@@ -198,7 +198,7 @@ public class MaterialScroller : NetworkBehaviour, IMaterialScroller
         }
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         CleanupMaterials();
     }

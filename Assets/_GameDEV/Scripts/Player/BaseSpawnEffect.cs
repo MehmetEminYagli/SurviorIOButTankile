@@ -5,7 +5,7 @@ using System.Collections;
 public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
 {
     [Header("Effect Settings")]
-    [SerializeField] protected ParticleSystem particleSystem;
+    [SerializeField] protected new ParticleSystem particleSystem;
     [SerializeField] protected float effectDuration = 2f;
 
     [Header("Rotation Settings")]
@@ -170,7 +170,7 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
         }
     }
     
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         Debug.Log($"[{(IsServer ? "Server" : "Client")}] OnDestroy called for effect {gameObject.name}");
         if (destroyCoroutine != null)

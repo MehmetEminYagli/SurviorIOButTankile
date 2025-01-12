@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using System.Collections;
 
 public class SpawnEffectManager : NetworkBehaviour
 {
@@ -255,22 +256,53 @@ public class SpawnEffectManager : NetworkBehaviour
     {
         if (IsServer) return;
         
+        // Try to get the NetworkObject immediately
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
         {
-            if (networkObject != null)
-            {
-                var particleSystems = networkObject.GetComponentsInChildren<ParticleSystem>(true);
-                foreach (var ps in particleSystems)
-                {
-                    SetParticleSystemColor(ps, color);
-                    ps.Clear();
-                    ps.Play();
-                }
-            }
+            UpdateParticleSystemColors(networkObject, color);
         }
         else
         {
-            Debug.LogWarning($"NetworkObject with ID {networkObjectId} not found in SpawnedObjects dictionary");
+            // If not found, wait a frame and try again
+            StartCoroutine(RetryUpdateEffect(networkObjectId, color));
+        }
+    }
+
+    private void UpdateParticleSystemColors(NetworkObject networkObject, Color color)
+    {
+        if (networkObject != null)
+        {
+            var particleSystems = networkObject.GetComponentsInChildren<ParticleSystem>(true);
+            foreach (var ps in particleSystems)
+            {
+                SetParticleSystemColor(ps, color);
+                ps.Clear();
+                ps.Play();
+            }
+        }
+    }
+
+    private System.Collections.IEnumerator RetryUpdateEffect(ulong networkObjectId, Color color)
+    {
+        int maxRetries = 5;
+        int currentRetry = 0;
+        
+        while (currentRetry < maxRetries)
+        {
+            yield return new WaitForSeconds(0.1f);
+            
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+            {
+                UpdateParticleSystemColors(networkObject, color);
+                yield break;
+            }
+            
+            currentRetry++;
+        }
+        
+        if (currentRetry >= maxRetries)
+        {
+            Debug.LogWarning($"Failed to find NetworkObject with ID {networkObjectId} after {maxRetries} retries");
         }
     }
     

@@ -467,7 +467,7 @@ public class LobbyManager : MonoBehaviour
         if (sceneName == "GameScene" && IsLobbyHost())
         {
             // NetworkSpawner'ı bul ve başlat
-            NetworkSpawner spawner = FindObjectOfType<NetworkSpawner>();
+            NetworkSpawner spawner = UnityEngine.Object.FindFirstObjectByType<NetworkSpawner>();
             if (spawner != null)
             {
                 Debug.Log("Scene loaded, NetworkSpawner found and ready.");

@@ -453,7 +453,7 @@ public class EnemySpawner : NetworkBehaviour
         }
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         if (NetworkManager.Singleton != null)
         {

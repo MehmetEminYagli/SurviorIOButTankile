@@ -7,7 +7,6 @@ public class RangedEnemy : BaseEnemy
     [Header("Ranged Settings")]
     [SerializeField] private Transform projectileSpawnPoint;
     [SerializeField] private float turnSpeed = 5f;
-    [SerializeField] private float lookAtSmoothing = 0.1f;
 
     [Header("Attack Settings")]
     [SerializeField] private float minAttackInterval = 3f;
@@ -111,7 +110,7 @@ public class RangedEnemy : BaseEnemy
         }
     }
 
-    private void Update()
+    protected override void Update()
     {
         if (target != null)
         {

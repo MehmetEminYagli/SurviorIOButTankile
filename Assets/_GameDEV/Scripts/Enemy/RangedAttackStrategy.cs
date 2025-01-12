@@ -108,8 +108,7 @@ public class RangedAttackStrategy : NetworkBehaviour, IAttackStrategy
 
         try
         {
-            // Object pool'dan mermi al ve NetworkObjectId'sini kaydet
-            ulong lastSpawnedId = 0;
+            // Object pool'dan mermi al
             ObjectPool.Instance.SpawnFromPoolServerRpc(
                 PROJECTILE_POOL_TAG,
                 projectileSpawnPoint.position,

@@ -9,7 +9,6 @@ public class NetworkRoomManager : NetworkBehaviour
 
     [Header("Room Settings")]
     [SerializeField] private int minPlayersToStart = 2;
-    [SerializeField] private int maxPlayers = 4;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform[] spawnPoints;
 

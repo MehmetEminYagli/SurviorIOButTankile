@@ -9,7 +9,6 @@ public class NetworkManagerController : MonoBehaviour
 
     [Header("Network Settings")]
     [SerializeField] private int maxPlayers = 4;
-    [SerializeField] private string gameVersion = "1.0";
 
     public event Action OnClientConnected;
     public event Action OnClientDisconnected;
@@ -46,6 +45,7 @@ public class NetworkManagerController : MonoBehaviour
 
         // Configure NetworkManager settings
         networkManager.ConnectionApprovalCallback += ApproveConnection;
+        networkManager.NetworkConfig.ConnectionApproval = true; // Enable connection approval
         SetupNetworkCallbacks();
     }
 

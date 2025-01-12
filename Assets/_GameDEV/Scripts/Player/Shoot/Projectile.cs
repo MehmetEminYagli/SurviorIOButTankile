@@ -3,7 +3,6 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     [SerializeField] private float lifetime = 3f;
-    [SerializeField] private float damage = 10f;
 
     private IProjectileStrategy _movementStrategy;
     private bool _hasCollided = false;
