@@ -7,6 +7,7 @@ using Unity.Services.Lobbies.Models;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using System;
+using System.Threading.Tasks;
 
 public class LobbyUI : MonoBehaviour
 {
@@ -14,6 +15,10 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private GameObject authPanel;
     [SerializeField] private TMP_InputField nicknameInput;
     [SerializeField] private Button confirmNicknameButton;
+    [SerializeField] private TextMeshProUGUI errorText;
+
+    [Header("Loading")]
+    [SerializeField] private GameObject loadingPanel;
 
     [Header("Main Menu")]
     [SerializeField] private GameObject mainMenuPanel;
@@ -43,6 +48,14 @@ public class LobbyUI : MonoBehaviour
     private float refreshTimer = 0f;
     private const float REFRESH_RATE = 1.5f;
 
+    [Header("Settings Panel")]
+    [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private TMP_InputField changeNicknameInput;
+    [SerializeField] private Button confirmNewNicknameButton;
+    [SerializeField] private Button openSettingsButton;
+    [SerializeField] private Button closeSettingsButton;
+    [SerializeField] private TextMeshProUGUI settingsErrorText;
+
     [System.Serializable]
     private class PlayerListItem
     {
@@ -52,11 +65,24 @@ public class LobbyUI : MonoBehaviour
 
     private Dictionary<string, PlayerListItem> playerListItems = new Dictionary<string, PlayerListItem>();
 
-    private void Start()
+    private async void Start()
     {
-        InitializeUnityServices();
+        // Önce UI setup'ı yap ve panelleri gizle
         SetupUI();
-        ValidateReferences();
+        
+        // Auth panelini göster (InitializeUnityServices başarısız olursa görünür kalacak)
+        ShowAuthPanel();
+        
+        // Unity Services'i başlat
+        try
+        {
+            await InitializeUnityServices();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to initialize Unity Services: {e.Message}");
+            ShowAuthPanel();
+        }
 
         if (nextMaterialButton != null)
             nextMaterialButton.onClick.AddListener(NextMaterial);
@@ -75,19 +101,11 @@ public class LobbyUI : MonoBehaviour
         }
     }
 
-    private async void InitializeUnityServices()
+    private async Task InitializeUnityServices()
     {
-        try
-        {
-            await UnityServices.InitializeAsync();
-            // Unity Services başlatıldıktan sonra auth durumunu kontrol et
-            CheckAuthenticationStatus();
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Failed to initialize Unity Services: {e.Message}");
-            ShowAuthPanel();
-        }
+        await UnityServices.InitializeAsync();
+        Debug.Log("Unity Services initialized");
+        await CheckAuthenticationStatus();
     }
 
     private void ValidateReferences()
@@ -129,8 +147,25 @@ public class LobbyUI : MonoBehaviour
         startGameButton.onClick.AddListener(OnStartGameClicked);
         leaveLobbyButton.onClick.AddListener(OnLeaveLobbyClicked);
 
-        // Initial state
-        ShowAuthPanel();
+        // Settings Panel Setup
+        if (openSettingsButton != null)
+            openSettingsButton.onClick.AddListener(ShowSettingsPanel);
+        
+        if (closeSettingsButton != null)
+            closeSettingsButton.onClick.AddListener(HideSettingsPanel);
+        
+        if (confirmNewNicknameButton != null)
+            confirmNewNicknameButton.onClick.AddListener(OnConfirmNewNicknameClicked);
+
+        // Initially hide all panels except auth panel
+        mainMenuPanel.SetActive(false);
+        lobbyRoomPanel.SetActive(false);
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
+        if (openSettingsButton != null)
+            openSettingsButton.gameObject.SetActive(false);
+        if (loadingPanel != null)
+            loadingPanel.SetActive(false);
     }
 
     private void ShowAuthPanel()
@@ -138,6 +173,8 @@ public class LobbyUI : MonoBehaviour
         authPanel.SetActive(true);
         mainMenuPanel.SetActive(false);
         lobbyRoomPanel.SetActive(false);
+        if (openSettingsButton != null)
+            openSettingsButton.gameObject.SetActive(false);
     }
 
     private void ShowMainMenu()
@@ -145,6 +182,8 @@ public class LobbyUI : MonoBehaviour
         authPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
         lobbyRoomPanel.SetActive(false);
+        if (openSettingsButton != null)
+            openSettingsButton.gameObject.SetActive(true);
         RefreshLobbyList();
     }
 
@@ -153,6 +192,8 @@ public class LobbyUI : MonoBehaviour
         authPanel.SetActive(false);
         mainMenuPanel.SetActive(false);
         lobbyRoomPanel.SetActive(true);
+        if (openSettingsButton != null)
+            openSettingsButton.gameObject.SetActive(false);
         
         // Start Game butonu sadece lobi sahibinde görünür olsun
         if (startGameButton != null)
@@ -473,11 +514,63 @@ public class LobbyUI : MonoBehaviour
         
         if (previousMaterialButton != null)
             previousMaterialButton.onClick.RemoveListener(PreviousMaterial);
+        
+        if (openSettingsButton != null)
+            openSettingsButton.onClick.RemoveListener(ShowSettingsPanel);
+        
+        if (closeSettingsButton != null)
+            closeSettingsButton.onClick.RemoveListener(HideSettingsPanel);
+        
+        if (confirmNewNicknameButton != null)
+            confirmNewNicknameButton.onClick.RemoveListener(OnConfirmNewNicknameClicked);
     }
 
-    private void CheckAuthenticationStatus()
+    private async Task CheckAuthenticationStatus()
     {
-        if (Unity.Services.Authentication.AuthenticationService.Instance.IsSignedIn)
+        try
+        {
+            Debug.Log("Checking authentication status...");
+            
+            // Kaydedilmiş nickname'i kontrol et
+            string savedName = LobbyManager.Instance.LoadPlayerName();
+            bool hasSavedName = !string.IsNullOrEmpty(savedName);
+            Debug.Log($"Has saved name: {hasSavedName}");
+
+            if (hasSavedName)
+            {
+                nicknameInput.text = savedName;
+                Debug.Log($"Attempting to authenticate with saved name: {savedName}");
+                bool success = await LobbyManager.Instance.AuthenticatePlayer(savedName);
+                if (success)
+                {
+                    Debug.Log("Authentication successful with saved name");
+                    ShowMainMenu();
+                    return;
+                }
+                else
+                {
+                    Debug.LogWarning("Failed to authenticate with saved name");
+                }
+            }
+
+            // Eğer buraya kadar geldiyse, auth panel'i göster
+            Debug.Log("Showing auth panel for new nickname");
+            ShowAuthPanel();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to check authentication status: {e.Message}");
+            ShowAuthPanel();
+        }
+    }
+
+    private async void AutoLoginWithSavedName()
+    {
+        loadingPanel.SetActive(true);
+        bool success = await LobbyManager.Instance.ReAuthenticatePlayer();
+        loadingPanel.SetActive(false);
+
+        if (success)
         {
             ShowMainMenu();
         }
@@ -487,8 +580,153 @@ public class LobbyUI : MonoBehaviour
         }
     }
 
+    public async void OnMainMenuButtonClicked()
+    {
+        loadingPanel.SetActive(true);
+        
+        try
+        {
+            // Önce bağlantıyı ve lobby durumunu temizle
+            await LobbyManager.Instance.DisconnectAndResetAsync();
+            
+            // Kaydedilmiş nickname'i kontrol et
+            if (LobbyManager.Instance.HasSavedPlayerName())
+            {
+                string savedName = PlayerPrefs.GetString(LobbyManager.PLAYER_NAME_PREFS_KEY);
+                nicknameInput.text = savedName;
+                
+                // Re-authenticate ve ana menüye yönlendir
+                bool success = await LobbyManager.Instance.AuthenticatePlayer(savedName);
+                if (success)
+                {
+                    ShowMainMenu();
+                    Debug.Log($"Successfully re-authenticated with saved name: {savedName}");
+                }
+                else
+                {
+                    ShowAuthPanel();
+                    Debug.LogError("Failed to re-authenticate with saved name");
+                }
+            }
+            else
+            {
+                // Auth panelini göster ve input field'ı temizle
+                ShowAuthPanel();
+                nicknameInput.text = "";
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error during main menu transition: {e.Message}");
+            ShowAuthPanel();
+        }
+        finally
+        {
+            // Diğer panelleri gizle
+            lobbyRoomPanel.SetActive(false);
+            loadingPanel.SetActive(false);
+            
+            // Hata mesajını temizle
+            if (errorText != null)
+            {
+                errorText.text = "";
+            }
+        }
+    }
+
     public int GetCurrentMaterialIndex()
     {
         return currentMaterialIndex;
+    }
+
+    private void ShowSettingsPanel()
+    {
+        if (settingsPanel != null)
+        {
+            // Diğer tüm panelleri gizle
+            authPanel.SetActive(false);
+            mainMenuPanel.SetActive(false);
+            lobbyRoomPanel.SetActive(false);
+            if (loadingPanel != null)
+                loadingPanel.SetActive(false);
+
+            // Settings panelini göster
+            settingsPanel.SetActive(true);
+
+            // Input field ve error text'i ayarla
+            if (changeNicknameInput != null)
+            {
+                changeNicknameInput.text = LobbyManager.Instance.GetPlayerName();
+            }
+            if (settingsErrorText != null)
+            {
+                settingsErrorText.text = "";
+            }
+
+            // Settings butonunu gizle
+            if (openSettingsButton != null)
+                openSettingsButton.gameObject.SetActive(false);
+        }
+    }
+
+    private void HideSettingsPanel()
+    {
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
+
+            // Ana menüye geri dön
+            ShowMainMenu();
+        }
+    }
+
+    private async void OnConfirmNewNicknameClicked()
+    {
+        if (changeNicknameInput == null || string.IsNullOrEmpty(changeNicknameInput.text))
+        {
+            ShowSettingsError("Nickname boş olamaz!");
+            return;
+        }
+
+        string newNickname = changeNicknameInput.text.Trim();
+
+        // Nickname validasyonu
+        if (!LobbyManager.Instance.IsValidNickname(newNickname))
+        {
+            ShowSettingsError("Geçersiz nickname! (3-16 karakter, harf, rakam, - ve _ kullanabilirsiniz)");
+            return;
+        }
+
+        // Eğer aynı nickname girilmişse
+        if (newNickname == LobbyManager.Instance.GetPlayerName())
+        {
+            ShowSettingsError("Bu zaten mevcut nickname'iniz!");
+            return;
+        }
+
+        confirmNewNicknameButton.interactable = false;
+        bool success = await LobbyManager.Instance.ChangePlayerName(newNickname);
+        confirmNewNicknameButton.interactable = true;
+
+        if (success)
+        {
+            ShowSettingsError("Nickname başarıyla değiştirildi!", Color.green);
+            RefreshPlayerList(); // Oyuncu listesini güncelle
+            await Task.Delay(1500); // 1.5 saniye bekle
+            HideSettingsPanel();
+        }
+        else
+        {
+            ShowSettingsError("Nickname değiştirilemedi! Lütfen tekrar deneyin.");
+        }
+    }
+
+    private void ShowSettingsError(string message, Color color = default)
+    {
+        if (settingsErrorText != null)
+        {
+            settingsErrorText.text = message;
+            settingsErrorText.color = color == default ? Color.red : color;
+        }
     }
 } 

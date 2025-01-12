@@ -1,6 +1,7 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
@@ -84,7 +85,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!isInitialized) return;
+        if (!IsOwner) return;
 
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -96,10 +97,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     private void FixedUpdate()
     {
-        if (!isInitialized) return;
+        if (!IsOwner) return;
         HandleMovement();
     }
 
@@ -172,5 +172,18 @@ public class PlayerController : MonoBehaviour
     private void ResetRotation()
     {
         transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (!IsOwner)
+        {
+            // Owner olmayan clientlarda joystick'i devre dışı bırak
+            if (joystick != null)
+            {
+                joystick.gameObject.SetActive(false);
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ using Unity.Networking.Transport.Relay;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using Network;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -39,16 +40,54 @@ public class LobbyManager : MonoBehaviour
     // NetworkVariable ekleyelim
     public NetworkVariable<int> NetworkedMaterialIndex = new NetworkVariable<int>();
 
+    public static readonly string PLAYER_NAME_PREFS_KEY = "PlayerNickname";
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            LoadPlayerName(); // Kaydedilmiş nickname'i yükle
         }
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    public string LoadPlayerName()
+    {
+        string savedName = PlayerPrefs.GetString(PLAYER_NAME_PREFS_KEY, "");
+        if (string.IsNullOrEmpty(savedName))
+        {
+            Debug.Log("No saved player name found");
+            return "";
+        }
+        
+        Debug.Log($"Loaded player name: {savedName}");
+        playerName = savedName;
+        return savedName;
+    }
+
+    private void SavePlayerName(string newPlayerName)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(newPlayerName))
+            {
+                Debug.LogError("Cannot save empty player name");
+                return;
+            }
+
+            playerName = newPlayerName;
+            PlayerPrefs.SetString(PLAYER_NAME_PREFS_KEY, playerName);
+            PlayerPrefs.Save(); // Force save immediately
+            Debug.Log($"Saved player name: {playerName}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error saving player name: {e.Message}");
         }
     }
 
@@ -68,13 +107,37 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
+            Debug.Log($"Starting authentication process. Nickname input: {playerNickname}");
+            
+            // Önce kaydedilmiş ismi kontrol et
+            bool hasSavedName = PlayerPrefs.HasKey(PLAYER_NAME_PREFS_KEY);
+            
+            // Eğer yeni bir nickname girilmişse, onu kullan ve kaydet
+            if (!string.IsNullOrEmpty(playerNickname))
+            {
+                SavePlayerName(playerNickname);
+            }
+            // Eğer yeni nickname girilmemiş ama kaydedilmiş isim varsa, onu kullan
+            else if (hasSavedName)
+            {
+                playerName = PlayerPrefs.GetString(PLAYER_NAME_PREFS_KEY);
+                Debug.Log($"Using saved nickname: {playerName}");
+            }
+            // Hiç isim yoksa false dön
+            else
+            {
+                Debug.LogWarning("No nickname provided and no saved nickname found");
+                return false;
+            }
+
+            // Eğer giriş yapılmamışsa
             if (!AuthenticationService.Instance.IsSignedIn)
             {
+                Debug.Log("Not signed in, attempting anonymous sign in");
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
-                playerName = playerNickname;
-                return true;
             }
-            return false;
+
+            return true;
         }
         catch (Exception e)
         {
@@ -633,5 +696,160 @@ public class LobbyManager : MonoBehaviour
         }
 
         return 0; // Varsayılan değer
+    }
+
+    public async Task DisconnectAndResetAsync()
+    {
+        try
+        {
+            // Önce mevcut nickname'i kaydet
+            string currentName = playerName;
+            
+            // Network bağlantılarını kapat
+            if (NetworkManager.Singleton != null)
+            {
+                if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsClient)
+                {
+                    NetworkManager.Singleton.Shutdown();
+                }
+            }
+
+            // Lobi bağlantısını temizle
+            if (currentLobby != null)
+            {
+                try
+                {
+                    if (AuthenticationService.Instance != null && AuthenticationService.Instance.IsSignedIn)
+                    {
+                        await LobbyService.Instance.RemovePlayerAsync(currentLobby.Id, AuthenticationService.Instance.PlayerId);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"Error removing player from lobby: {e.Message}");
+                }
+            }
+
+            // Değişkenleri sıfırla
+            currentLobby = null;
+            heartbeatTimer = 0f;
+            lobbyUpdateTimer = 0f;
+            lastLobbyUpdateTime = 0f;
+
+            // Nickname'i geri yükle
+            playerName = currentName;
+            PlayerPrefs.SetString(PLAYER_NAME_PREFS_KEY, playerName);
+            PlayerPrefs.Save();
+
+            Debug.Log($"Successfully disconnected and reset lobby manager. Restored nickname: {playerName}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error during disconnect and reset: {e.Message}");
+        }
+    }
+
+    public async Task<bool> ReAuthenticatePlayer()
+    {
+        try
+        {
+            string savedName = PlayerPrefs.GetString(PLAYER_NAME_PREFS_KEY, playerName);
+            
+            if (AuthenticationService.Instance.IsSignedIn)
+            {
+                AuthenticationService.Instance.SignOut();
+            }
+
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            playerName = savedName; // Restore the saved name after re-authentication
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Re-authentication failed: {e.Message}");
+            return false;
+        }
+    }
+
+    // Ana menüye dönüş butonu için çağrılacak metod
+    public async void OnMainMenuButtonClicked()
+    {
+        string savedName = PlayerPrefs.GetString(PLAYER_NAME_PREFS_KEY, playerName);
+        await DisconnectAndResetAsync();
+        playerName = savedName; // Ensure the player name is maintained
+        
+        // If we need to re-authenticate, do it while maintaining the name
+        if (!AuthenticationService.Instance.IsSignedIn)
+        {
+            await ReAuthenticatePlayer();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // Uygulama kapanırken temizlik yap
+        if (currentLobby != null && AuthenticationService.Instance != null && AuthenticationService.Instance.IsSignedIn)
+        {
+            try
+            {
+                LobbyService.Instance.RemovePlayerAsync(currentLobby.Id, AuthenticationService.Instance.PlayerId).Forget();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Error during cleanup: {e.Message}");
+            }
+        }
+    }
+
+    public bool HasSavedPlayerName()
+    {
+        return PlayerPrefs.HasKey(PLAYER_NAME_PREFS_KEY);
+    }
+
+    public async Task<bool> ChangePlayerName(string newPlayerName)
+    {
+        try
+        {
+            // Eğer oyuncu bir lobideyse, lobi verilerini güncelle
+            if (currentLobby != null)
+            {
+                var playerData = new Dictionary<string, PlayerDataObject>
+                {
+                    { "Nickname", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, newPlayerName) },
+                    { "MaterialIndex", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, localPlayerMaterialIndex.ToString()) }
+                };
+
+                await LobbyService.Instance.UpdatePlayerAsync(
+                    currentLobby.Id,
+                    AuthenticationService.Instance.PlayerId,
+                    new UpdatePlayerOptions { Data = playerData }
+                );
+            }
+
+            // Yeni ismi kaydet
+            SavePlayerName(newPlayerName);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to change player name: {e.Message}");
+            return false;
+        }
+    }
+
+    // Nickname değiştirme işlemi için validation
+    public bool IsValidNickname(string nickname)
+    {
+        // Boş veya null kontrolü
+        if (string.IsNullOrWhiteSpace(nickname))
+            return false;
+
+        // Minimum ve maksimum uzunluk kontrolü
+        if (nickname.Length < 3 || nickname.Length > 16)
+            return false;
+
+        // Sadece harf, rakam ve bazı özel karakterlere izin ver
+        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z0-9_-]+$");
+        return regex.IsMatch(nickname);
     }
 } 
