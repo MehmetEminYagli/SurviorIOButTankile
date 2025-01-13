@@ -1,12 +1,15 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections;
+using DG.Tweening;
 
 public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
 {
     [Header("Effect Settings")]
     [SerializeField] protected new ParticleSystem particleSystem;
     [SerializeField] protected float effectDuration = 2f;
+    [SerializeField] protected float scaleAnimationDuration = 0.5f;
+    [SerializeField] protected float maxScale = 1.5f;
 
     [Header("Rotation Settings")]
     [Tooltip("The rotation of the effect when spawned (in degrees)")]
@@ -23,6 +26,9 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
     {
         base.OnNetworkSpawn();
         shouldDestroy.OnValueChanged += OnShouldDestroyChanged;
+        
+        // Set initial scale
+        transform.localScale = Vector3.one;
     }
 
     public override void OnNetworkDespawn()
@@ -62,9 +68,13 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
             StopCoroutine(destroyCoroutine);
         }
         
+        // Kill any existing tweens
+        transform.DOKill();
+        
         position.y = 0.01f;
         transform.position = position;
-        transform.rotation = Quaternion.Euler(spawnRotation);
+        transform.localScale = Vector3.one;
+
         currentColor = playerColor;
         
         if (IsOwner || IsLocalPlayer)
@@ -118,21 +128,35 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
     
     private IEnumerator InitiateDestroySequence()
     {
-        yield return new WaitForSeconds(effectDuration);
+        yield return new WaitForSeconds(effectDuration - scaleAnimationDuration);
         
-        Debug.Log($"[Server] Initiating destroy sequence for effect {gameObject.name}");
-        shouldDestroy.Value = true;
-        
-        yield return new WaitForEndOfFrame();
-        
-        if (NetworkObject != null && NetworkObject.IsSpawned)
+        if (IsServer)
         {
-            Debug.Log($"[Server] Despawning network object for effect {gameObject.name}");
-            NetworkObject.Despawn(true);
+            PlayDestroyAnimationClientRpc();
         }
         
-        yield return new WaitForEndOfFrame();
-        Destroy(gameObject);
+        yield return new WaitForSeconds(scaleAnimationDuration);
+        
+        if (IsServer)
+        {
+            shouldDestroy.Value = true;
+            Destroy(gameObject);
+        }
+    }
+
+    [ClientRpc]
+    private void PlayDestroyAnimationClientRpc()
+    {
+        // Kill any existing tweens
+        transform.DOKill();
+        
+        // Önce büyüt, tamamlanınca küçült
+        transform.DOScale(Vector3.one * maxScale, scaleAnimationDuration * 0.5f)
+            .SetEase(Ease.InOutQuad)
+            .OnComplete(() => {
+                transform.DOScale(Vector3.zero, scaleAnimationDuration * 0.5f)
+                    .SetEase(Ease.InOutQuad);
+            });
     }
     
     [ClientRpc]
@@ -177,6 +201,7 @@ public abstract class BaseSpawnEffect : NetworkBehaviour, ISpawnEffect
         {
             StopCoroutine(destroyCoroutine);
         }
+        transform.DOKill();
     }
     
     protected virtual void OnValidate()

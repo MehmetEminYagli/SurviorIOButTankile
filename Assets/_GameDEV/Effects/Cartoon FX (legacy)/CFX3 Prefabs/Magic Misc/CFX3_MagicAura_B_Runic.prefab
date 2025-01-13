@@ -19163,7 +19163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 0
+  GlobalObjectIdHash: 1421503731
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -19191,4 +19191,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   particleSystem: {fileID: 19800006}
   effectDuration: 2
+  scaleAnimationDuration: 0.6
+  maxScale: 1.5
   spawnRotation: {x: -90, y: 0, z: 0}
