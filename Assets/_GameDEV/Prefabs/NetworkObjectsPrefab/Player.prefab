@@ -327,10 +327,10 @@ GameObject:
   - component: {fileID: 6393004204680315635}
   - component: {fileID: 5804724114548300398}
   - component: {fileID: 5689234214005813352}
+  - component: {fileID: 6706339991342299562}
   - component: {fileID: 6184589752700955554}
   - component: {fileID: 3790630474590495582}
   - component: {fileID: 3819351716425556703}
-  - component: {fileID: 6706339991342299562}
   - component: {fileID: 8796498870313810295}
   - component: {fileID: 1555969611664723361}
   - component: {fileID: 984506789104149701}
@@ -339,6 +339,7 @@ GameObject:
   - component: {fileID: 4190216849694864141}
   - component: {fileID: 5229695449203946721}
   - component: {fileID: 235690078789776451}
+  - component: {fileID: 8792243373325439486}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -415,6 +416,31 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.4044907, y: 1.3396336, z: 1.371891}
   m_Center: {x: 0.025396228, y: 0.6798168, z: -0.10826492}
+--- !u!114 &6706339991342299562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1342975682272047854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 3030967865
+  InScenePlacedSourceGlobalObjectIdHash: 3030967865
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &6184589752700955554
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -427,6 +453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d56dbaf4dddbb3d479a3666c9023eda5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   moveSpeed: 5
   joystick: {fileID: 585063867823694794}
   cameraTransform: {fileID: 0}
@@ -463,31 +490,6 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
---- !u!114 &6706339991342299562
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1342975682272047854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4165846224
-  InScenePlacedSourceGlobalObjectIdHash: 3030967865
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &8796498870313810295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -582,6 +584,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c1a6e46f86675c4d8e8701330ff7ba9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &4190216849694864141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -644,6 +647,22 @@ MonoBehaviour:
   healthFillImage: {fileID: 991499402058281139}
   healthBarCanvas: {fileID: 4567890206236341102}
   heightOffset: 3
+--- !u!114 &8792243373325439486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1342975682272047854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61adbe940f473734d8d99073d780196f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  positionThreshold: 0.01
+  rotationThreshold: 0.1
+  interpolationSpeed: 15
 --- !u!1 &1815352020480872054
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7152445535500955879}
   - component: {fileID: 6077559154967175824}
   - component: {fileID: 6556347548248992664}
+  - component: {fileID: 7531621863602780216}
   m_Layer: 7
   m_Name: EnemyBullet
   m_TagString: Untagged
@@ -123,10 +124,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   damage: 10
-  lifeTime: 5
-  arcHeight: 2
-  rotateTowardsVelocity: 1
-  rotationSpeed: 15
+  maxLifetime: 5
+  collisionCheckRadius: 0.1
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &7531621863602780216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6979449682678747883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61adbe940f473734d8d99073d780196f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  positionThreshold: 0.005
+  rotationThreshold: 0.1
+  interpolationSpeed: 25
 --- !u!1001 &7575198202984811832
 PrefabInstance:
   m_ObjectHideFlags: 0

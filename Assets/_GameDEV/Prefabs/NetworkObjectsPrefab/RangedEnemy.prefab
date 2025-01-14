@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 94064620730480410}
   - component: {fileID: 5484972046898674005}
   - component: {fileID: -2745404860574704820}
+  - component: {fileID: -6495355968138252786}
   m_Layer: 9
   m_Name: RangedEnemy
   m_TagString: Untagged
@@ -97,12 +98,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac3378e91c2e4db40b628fb916be9af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   maxHealth: 100
   moveSpeed: 5
   stoppingDistance: 5
   attackRange: 10
   attackCooldown: 2
   accuracy: 0.8
+  deathEffectPrefab: {fileID: 0}
+  fadeOutDuration: 1
+  deathEffectDuration: 2
   rotationSpeed: 5
   updatePathInterval: 0.1
   accelerationSpeed: 8
@@ -111,7 +116,6 @@ MonoBehaviour:
   pathEndThreshold: 0.5
   projectileSpawnPoint: {fileID: 208714598244549298}
   turnSpeed: 5
-  lookAtSmoothing: 0.1
   minAttackInterval: 1
   maxAttackInterval: 3
   firstShotDelay: 0.5
@@ -169,6 +173,22 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &-6495355968138252786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5788439261300901376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61adbe940f473734d8d99073d780196f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  positionThreshold: 0.015
+  rotationThreshold: 0.25
+  interpolationSpeed: 12
 --- !u!1 &7692756960504214738
 GameObject:
   m_ObjectHideFlags: 0
